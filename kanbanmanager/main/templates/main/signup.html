@@ -1,0 +1,63 @@
+{# templates/main/signup.html #}
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 500px;">
+  <h2>Регистрация</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {# Выводим общие ошибки формы (если они есть) #}
+    {{ form.non_field_errors }}
+
+    <div class="mb-3">
+      {{ form.username.label_tag }}
+      {{ form.username }}
+      {% if form.username.errors %}
+        <div class="text-danger">{{ form.username.errors.as_ul }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.email.label_tag }}
+      {{ form.email }}
+      {% if form.email.errors %}
+        <div class="text-danger">{{ form.email.errors.as_ul }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.region.label_tag }}
+      {{ form.region }}
+      {% if form.region.errors %}
+        <div class="text-danger">{{ form.region.errors.as_ul }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.password1.label_tag }}
+      {{ form.password1 }}
+      {% if form.password1.errors %}
+        <div class="text-danger">{{ form.password1.errors.as_ul }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.password2.label_tag }}
+      {{ form.password2 }}
+      {% if form.password2.errors %}
+        <div class="text-danger">{{ form.password2.errors.as_ul }}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+  </form>
+
+  <p class="mt-3 text-muted">
+    Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a>
+  </p>
+</div>
+{% endblock %}

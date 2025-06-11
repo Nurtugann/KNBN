@@ -1,0 +1,158 @@
+/* custom.css */
+
+/* 1. Корневая тема — переменные */
+:root {
+  --color-primary:   #4a90e2;
+  --color-secondary: #f5f7fa;
+  --color-accent:    #50e3c2;
+  --color-danger:    #dc3545;
+  --color-warning:   #f5a623;
+  --color-success:   #7ed321;
+  --color-text:      #333333;
+
+  --radius-sm:   0.25rem;
+  --radius:      0.5rem;
+  --radius-lg:   0.75rem;
+  --shadow-sm:   0 2px 4px rgba(0,0,0,0.05);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* 2. Базовые стили */
+body {
+  background-color: var(--color-secondary);
+  color:            var(--color-text);
+  font-family:      'Inter', sans-serif;
+  line-height:      1.6;
+}
+
+/* 3. Навигация */
+.navbar {
+  background-color: #fff !important;
+  box-shadow:       var(--shadow-sm);
+}
+.navbar-brand {
+  color:      var(--color-primary) !important;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.nav-link {
+  color:           var(--color-text) !important;
+  transition:      color 0.2s;
+}
+.nav-link:hover {
+  color: var(--color-primary) !important;
+}
+.nav-link.active {
+  color:       var(--color-accent) !important;
+  font-weight: 600;
+}
+
+/* 4. Карточки */
+.card {
+  border:         none;
+  border-radius:  var(--radius-lg);
+  box-shadow:     var(--shadow-md);
+  transition:     transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  transform:      translateY(-2px);
+  box-shadow:     0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* 5. Кнопки */
+.btn-primary {
+  background-color: var(--color-primary);
+  border-color:     var(--color-primary);
+  border-radius:    var(--radius);
+  transition:       background-color 0.2s;
+}
+.btn-primary:hover {
+  background-color: #3f7acb;
+}
+.btn-outline-primary {
+  color:            var(--color-primary);
+  border-color:     var(--color-primary);
+  border-radius:    var(--radius);
+  transition:       background-color 0.2s, color 0.2s;
+}
+.btn-outline-primary:hover {
+  background-color: var(--color-primary);
+  color:            #fff;
+}
+.btn-success {
+  background-color: var(--color-accent);
+  border-color:     var(--color-accent);
+  border-radius:    var(--radius);
+}
+.btn-success:hover {
+  background-color: #3ac9b0;
+}
+
+/* 6. Алерты */
+.alert {
+  border-radius: var(--radius);
+  box-shadow:    var(--shadow-sm);
+}
+
+/* 7. Kanban-колонка и скролл */
+.status-list {
+  background-color: #fff;
+  border-radius:    var(--radius);
+  padding:          0.75rem;
+  max-height:       60vh;
+  overflow-y:       auto;
+}
+.status-list::-webkit-scrollbar {
+  width: 6px;
+}
+.status-list::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.1);
+  border-radius:    3px;
+}
+
+/* 8. Элементы списка */
+.list-group-item {
+  border:          none;
+  border-radius:   var(--radius);
+  margin-bottom:   0.5rem;
+  transition:      background-color 0.2s, box-shadow 0.2s;
+}
+.list-group-item:hover {
+  background-color: rgba(0,0,0,0.03);
+  box-shadow:       var(--shadow-sm);
+}
+
+/* 9. Стили для статусов (company_detail) */
+.status-item {
+  transition: background-color 0.2s, border-color 0.2s;
+}
+.status-item.passed {
+  background-color: var(--color-success);
+  color:            #fff;
+  border-color:     var(--color-success);
+}
+.status-item.current {
+  background-color: var(--color-warning);
+  color:            #212529;
+  border-color:     var(--color-warning);
+}
+.status-item.paused {
+  background-color: #f8f9fa;
+  color:            #6c757d;
+  border-color:     #ced4da;
+}
+
+/* 10. Таблицы */
+.table thead {
+  background-color: var(--color-primary);
+  color:            #fff;
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #f2f6fc;
+}
+
+/* 11. Отступы контейнера */
+.container-fluid {
+  padding-left:  1.5rem;
+  padding-right: 1.5rem;
+}

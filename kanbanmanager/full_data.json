@@ -1,0 +1,740 @@
+[
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$870000$62zfNL2eThGyUvu9hF1ae2$1XIqqV0mdzA5AS6fLgBU8fua3AiXeC3oyslljJQHXpc=",
+    "last_login": "2025-06-10T16:32:23.513Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-05-28T11:30:31Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$870000$dMYe0aHyp1fWFB1ukgsdbm$7rtgDcEqqgIWkyrPLXWz7PMBTK+NdSuMoaq3hRxSG+k=",
+    "last_login": "2025-06-05T09:55:27.465Z",
+    "is_superuser": false,
+    "username": "Юрист",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-05-29T07:23:49Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$4MTPYdMe8lsFYkZzVnM4K8$EDJyWuhUTusI3t4fX44bCeTpj7fvR6/MlzHcSCKEFYE=",
+    "last_login": "2025-06-03T04:52:54.242Z",
+    "is_superuser": false,
+    "username": "Юрист2",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-05-29T10:18:47.693Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "41c3eg9yzgosiguip1tju3g8q46q6uxh",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBKp0Nx6b5nIDAMUjWQlHZlvLtt0oVu33v_v4Xz25rd1nhxcxRX0YnLLwuenlwOER--3KukWtZlDvJI5GmbnGrk1-1s_w6yb3lfe4WkfYQB0IbewJh0CorYaBwh2qQC226HSAqNjcZwQNbUQxpAm6TE5wvggDe2:1uP08H:-rBwY2Sb0pbYvpYrbt-GScBGbtPbK7IsvgtQP4KYh48",
+    "expire_date": "2025-06-24T14:39:21.335Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "483pe6r1reay070ezyxv2wrn5w0urq2y",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBKp0Nx6b5nIDAMUjWQlHZlvLtt0oVu33v_v4Xz25rd1nhxcxRX0YnLLwuenlwOER--3KukWtZlDvJI5GmbnGrk1-1s_w6yb3lfe4WkfYQB0IbewJh0CorYaBwh2qQC226HSAqNjcZwQNbUQxpAm6TE5wvggDe2:1uN8to:8uNuNj4cOdqvAVQpK7XAHn-0CqhN7YAlsjvGFUmYIQk",
+    "expire_date": "2025-06-19T11:36:44.890Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "7c03h06aadknoqnyej0xpyj7lwhdg4e8",
+  "fields": {
+    "session_data": "e30:1uKWJl:aBZ69s-eaA3Im4m9B17FlI_YLxkKRLRD-8m5EZ7PWOA",
+    "expire_date": "2025-06-12T06:00:41.288Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "b2sj7jxteos48zb3fp7vnfny5iwu158h",
+  "fields": {
+    "session_data": ".eJxVjDsOwjAQBe_iGln-b0xJzxks766FA8iW4qRC3B0ipYD2zcx7iZS3taZtlCXNLM5Ci9Pvhpkepe2A77nduqTe1mVGuSvyoENeO5fn5XD_Dmoe9VsX1KAmpzIyMnCMGBC8ghKNxRKds9pzDkQBJwiaCJgsO0JDYKw34v0B8vQ4Lg:1uMMLG:GrmdEFdxuzJ4vK9MB4gfkhufIsYVjT8FqD6OFyfGRtk",
+    "expire_date": "2025-06-17T07:45:50.590Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "cp6bkwmaj6ostst23kngsm78nj4ohjcx",
+  "fields": {
+    "session_data": "e30:1uKWwc:LYak66-KDRIGlxalTj8lLiutE9XgmFSDVLAor4NuTyk",
+    "expire_date": "2025-06-12T06:40:50.870Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "ongila4p5bprkg2h9do27eetkmv7dodo",
+  "fields": {
+    "session_data": "e30:1uKWKL:gEC9qR1Z8ERBGf0tWq8AX5SUbFC3s2hBXYhUjPhjp6o",
+    "expire_date": "2025-06-12T06:01:17.763Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "wxcn6k363qykaay38utfv3qmtnkyg61u",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBKp0Nx6b5nIDAMUjWQlHZlvLtt0oVu33v_v4Xz25rd1nhxcxRX0YnLLwuenlwOER--3KukWtZlDvJI5GmbnGrk1-1s_w6yb3lfe4WkfYQB0IbewJh0CorYaBwh2qQC226HSAqNjcZwQNbUQxpAm6TE5wvggDe2:1uP1tf:jsM3L-PEJpDzKyBaeWy9Ko5V80yB6sFXwagDD39Pid8",
+    "expire_date": "2025-06-24T16:32:23.519Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "zqehk5g0fvr3v6dhaktypcoqykheypfo",
+  "fields": {
+    "session_data": "e30:1uKWM5:XO1-LOzMB9UVPm7QXs2WXBdyAb64gr-2UZJpO3zf1SU",
+    "expire_date": "2025-06-12T06:03:05.603Z"
+  }
+},
+{
+  "model": "main.status",
+  "pk": 1,
+  "fields": {
+    "name": "Претензия",
+    "order": 0,
+    "duration_days": 5
+  }
+},
+{
+  "model": "main.status",
+  "pk": 2,
+  "fields": {
+    "name": "Составление искового заявления",
+    "order": 1,
+    "duration_days": 2
+  }
+},
+{
+  "model": "main.status",
+  "pk": 3,
+  "fields": {
+    "name": "Направление заявления в арбитражный суд (электронно)",
+    "order": 2,
+    "duration_days": 1
+  }
+},
+{
+  "model": "main.status",
+  "pk": 4,
+  "fields": {
+    "name": "Оплата регистрационного сбора",
+    "order": 3,
+    "duration_days": 2
+  }
+},
+{
+  "model": "main.status",
+  "pk": 5,
+  "fields": {
+    "name": "Рассмотрение искового заявления в арбитражном суде",
+    "order": 5,
+    "duration_days": 20
+  }
+},
+{
+  "model": "main.status",
+  "pk": 6,
+  "fields": {
+    "name": "Вступление в законную силу решения арбитра",
+    "order": 6,
+    "duration_days": 20
+  }
+},
+{
+  "model": "main.status",
+  "pk": 7,
+  "fields": {
+    "name": "Составление заявления о принудительном исполнении арбитражного решения в СМЭС",
+    "order": 7,
+    "duration_days": 1
+  }
+},
+{
+  "model": "main.status",
+  "pk": 8,
+  "fields": {
+    "name": "Направление заявления в арбитражный суд (нарочно)",
+    "order": 4,
+    "duration_days": 1
+  }
+},
+{
+  "model": "main.status",
+  "pk": 9,
+  "fields": {
+    "name": "Оплата государственной пошлины о принудительном исполнении арбитражного решения в СМЭС (5МРП)",
+    "order": 8,
+    "duration_days": 2
+  }
+},
+{
+  "model": "main.status",
+  "pk": 10,
+  "fields": {
+    "name": "Рассмотрение заявления о принудительном исполнении арбитражного решения в СМЭС",
+    "order": 9,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 11,
+  "fields": {
+    "name": "Вступление в силу определения о принудительном исполнении арбитражного решения",
+    "order": 10,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 12,
+  "fields": {
+    "name": "Получение исполнительного листа",
+    "order": 11,
+    "duration_days": 5
+  }
+},
+{
+  "model": "main.status",
+  "pk": 13,
+  "fields": {
+    "name": "Возбуждение исполнительного производства",
+    "order": 12,
+    "duration_days": 3
+  }
+},
+{
+  "model": "main.status",
+  "pk": 14,
+  "fields": {
+    "name": "Принятия мер по обеспечению исполнения требовании исполнительного документа",
+    "order": 13,
+    "duration_days": 5
+  }
+},
+{
+  "model": "main.status",
+  "pk": 15,
+  "fields": {
+    "name": "Направления уведомления о проведении исполнительных действии в части описи и ареста и передачи на ответхранения на 5 рабочий день после должного уведомления должника",
+    "order": 14,
+    "duration_days": 5
+  }
+},
+{
+  "model": "main.status",
+  "pk": 16,
+  "fields": {
+    "name": "Составления акт описи ареста движимого имущества и передача на ответхранения",
+    "order": 15,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 17,
+  "fields": {
+    "name": "Вынесения постановления о проведении оценки движимого имущества сторонами исполнительного производства и его ознакомления. В случае, если должником произведена оценка, направления данной оценки взыскателя на ознакомления",
+    "order": 16,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 18,
+  "fields": {
+    "name": "По истечению 10 раб. дней сторонами не проведена оенка, ЧСИ выносит постановление о назначении оценщика и направляет его сторонам исполнительного производства",
+    "order": 17,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 19,
+  "fields": {
+    "name": "Выносится постановление о приобщении отчета об оценке к испольнительному производству, отчет об оценке и постановление направляются на ознакомления сторонам исполнительного производства",
+    "order": 18,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 20,
+  "fields": {
+    "name": "По истечению 10 раб дней выносится постановление на торги (по движемому имуществу) и направляется сторонам исполнительного производства",
+    "order": 19,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 21,
+  "fields": {
+    "name": "Формирование заявки и направляются на первые торги (на повышение)",
+    "order": 20,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 22,
+  "fields": {
+    "name": "В случае не поступления предложения от взыскателя в течение 10 дней оставить за собой имущества за минусом 20%, формируется заявк на повторные торги (на понижение). В случае реализации имущества, выноситься постановление о распределения поступивших сумм и направляет на ознакомление сторонам исполнительного производства.",
+    "order": 21,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 23,
+  "fields": {
+    "name": "Формирование заявки на повторные торги (на понижение). В случае реализации имущества, выноситься постановление о распределения поступивших сумм и направляет на ознакомление сторонам исполнительного производства.",
+    "order": 22,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 24,
+  "fields": {
+    "name": "Подача представления об обращении взыскания на недвижимое имущество в суд",
+    "order": 23,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 25,
+  "fields": {
+    "name": "Вступление в законную силу решение суда",
+    "order": 24,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 26,
+  "fields": {
+    "name": "Вынесение постановления о проведении оценки недвижимого имущетсва сторонами исполнительного производства и его ознакомления. В случае, если должником произведена оценка, направления данной оценки взыскателя на ознакомления.",
+    "order": 25,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 27,
+  "fields": {
+    "name": "По истечению 10 раб. дней сторонами не проведена оценка, ЧСИ выносит постановление о назначении оценщика и направляет его сторонами исполнительного производства",
+    "order": 26,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 28,
+  "fields": {
+    "name": "Выносится постановление о приобщении отчета об оценке к исполнительному производтсву, отчет об оценке и постановление направялются на ознакомления сторонам испольнительного производтства",
+    "order": 27,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 29,
+  "fields": {
+    "name": "По истечению 10 раб дней выносится постановление на торги (по недвижимому имуществу) и направляется сторонам исполнительного производства",
+    "order": 28,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 30,
+  "fields": {
+    "name": "Формирование заявки и направляются на первые торги (на повышения)",
+    "order": 29,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 31,
+  "fields": {
+    "name": "В случае не поступления предложения от взыскателя в течение 10 дней оставить за собой имущества за минусом 20% формируется заявка на повторные торги(на понижения). В случае реализации имущесвта, выносится постановление о распределения поступивших сумм и направляет на ознакомление сторонам исполнительного производства.",
+    "order": 30,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.status",
+  "pk": 32,
+  "fields": {
+    "name": "Формирование заявки на повторные торги (на понижения). В случае реализации имущества, выноситься постановление о распределения поступивших сумм и направляет на ознакомление сторонам исполнительного производтства.",
+    "order": 31,
+    "duration_days": 10
+  }
+},
+{
+  "model": "main.region",
+  "pk": 1,
+  "fields": {
+    "code": "KST",
+    "name": "Костанай"
+  }
+},
+{
+  "model": "main.region",
+  "pk": 2,
+  "fields": {
+    "code": "AKM",
+    "name": "Акмола"
+  }
+},
+{
+  "model": "main.region",
+  "pk": 3,
+  "fields": {
+    "code": "PAV",
+    "name": "Павлодар"
+  }
+},
+{
+  "model": "main.region",
+  "pk": 4,
+  "fields": {
+    "code": "KAR",
+    "name": "Караганда"
+  }
+},
+{
+  "model": "main.region",
+  "pk": 5,
+  "fields": {
+    "code": "VKO",
+    "name": "ВКО"
+  }
+},
+{
+  "model": "main.region",
+  "pk": 6,
+  "fields": {
+    "code": "SKO",
+    "name": "СКО"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 3,
+  "fields": {
+    "name": "Первая компания",
+    "bin_number": null,
+    "manager_name": "Андрей",
+    "debt_amount": null,
+    "status": 5,
+    "position": 1,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 4,
+  "fields": {
+    "name": "Вторая Тоошка",
+    "bin_number": null,
+    "manager_name": null,
+    "debt_amount": null,
+    "status": 4,
+    "position": 1,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 6,
+  "fields": {
+    "name": "Четвертая",
+    "bin_number": null,
+    "manager_name": null,
+    "debt_amount": null,
+    "status": 6,
+    "position": 3,
+    "region": "VKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 7,
+  "fields": {
+    "name": "Пятая",
+    "bin_number": null,
+    "manager_name": null,
+    "debt_amount": null,
+    "status": 14,
+    "position": 4,
+    "region": "KAR"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 8,
+  "fields": {
+    "name": "Шестая",
+    "bin_number": null,
+    "manager_name": null,
+    "debt_amount": null,
+    "status": 15,
+    "position": 5,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 9,
+  "fields": {
+    "name": "Седьмая",
+    "bin_number": null,
+    "manager_name": null,
+    "debt_amount": null,
+    "status": 3,
+    "position": 1,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 10,
+  "fields": {
+    "name": "Третья Тоошка",
+    "bin_number": null,
+    "manager_name": null,
+    "debt_amount": null,
+    "status": 5,
+    "position": 2,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 117,
+  "fields": {
+    "company": 3,
+    "status": 3,
+    "changed_at": "2025-06-05T09:24:05.569Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 119,
+  "fields": {
+    "company": 4,
+    "status": 1,
+    "changed_at": "2025-06-05T09:40:29.214Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 120,
+  "fields": {
+    "company": 10,
+    "status": 5,
+    "changed_at": "2025-05-01T09:40:00Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 121,
+  "fields": {
+    "company": 6,
+    "status": 6,
+    "changed_at": "2025-06-05T09:40:53.479Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 122,
+  "fields": {
+    "company": 7,
+    "status": 14,
+    "changed_at": "2025-05-05T09:41:00Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 123,
+  "fields": {
+    "company": 8,
+    "status": 15,
+    "changed_at": "2025-06-05T09:41:09.938Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 124,
+  "fields": {
+    "company": 9,
+    "status": 2,
+    "changed_at": "2025-06-05T09:41:19.272Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 125,
+  "fields": {
+    "company": 4,
+    "status": 6,
+    "changed_at": "2025-06-05T09:55:58.904Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 126,
+  "fields": {
+    "company": 4,
+    "status": 5,
+    "changed_at": "2025-06-05T09:56:08.101Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 127,
+  "fields": {
+    "company": 4,
+    "status": 8,
+    "changed_at": "2025-06-05T10:04:17.194Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 128,
+  "fields": {
+    "company": 4,
+    "status": 4,
+    "changed_at": "2025-06-05T10:04:34.619Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.companystatushistory",
+  "pk": 129,
+  "fields": {
+    "company": 9,
+    "status": 3,
+    "changed_at": "2025-06-05T12:06:06.487Z",
+    "is_paused": false,
+    "paused_at": null
+  }
+},
+{
+  "model": "main.comment",
+  "pk": 1,
+  "fields": {
+    "company": 4,
+    "status": 6,
+    "author": 1,
+    "text": "Например привер",
+    "created_at": "2025-06-05T05:20:19.063Z"
+  }
+},
+{
+  "model": "main.comment",
+  "pk": 2,
+  "fields": {
+    "company": 4,
+    "status": 4,
+    "author": 1,
+    "text": "Какой пример коментарии тд тп траляля",
+    "created_at": "2025-06-05T05:24:35.737Z"
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "regions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 2,
+  "fields": {
+    "user": 2,
+    "regions": [
+      2,
+      4
+    ]
+  }
+},
+{
+  "model": "main.profile",
+  "pk": 3,
+  "fields": {
+    "user": 3,
+    "regions": [
+      1,
+      3,
+      5,
+      6
+    ]
+  }
+}
+]

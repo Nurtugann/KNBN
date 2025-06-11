@@ -1,0 +1,348 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}{{ company.name }}{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* ─── Заголовок компании ─────────────────────────────────────────────────── */
+    .company-header.card {
+      background: #fff;
+      border-radius: .75rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 .125rem .25rem rgba(0,0,0,0.075);
+    }
+    .company-header .company-name {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.2;
+      color: #222;
+    }
+    .company-header .company-meta {
+      margin-top: .5rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .company-header .company-meta .badge,
+    .company-header .company-meta small {
+      font-size: .9rem;
+      padding: .4em .6em;
+    }
+
+    /* ─── Список этапов ─────────────────────────────────────────────────────── */
+    .statuses-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .statuses-list li {
+      margin-bottom: 0.75rem;
+    }
+    .status-item {
+      display: flex;
+      flex-direction: column;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e2e5ed;
+      border-radius: 0.5rem;
+      background-color: #fff;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .status-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .status-item.passed { border-left: .25rem solid #138f3f; background: #d4edda; color: #0c4e1e; }
+    .status-item.current { border-left: .25rem solid #856404; background: #fff3cd; color: #856404; }
+    .status-item.paused  { border-left: .25rem solid #ced4da; background: #f8f9fa; color: #6c757d; }
+
+    .status-date, .expected-end {
+      font-size: .85rem; color: #6c757d; margin-top: .25rem;
+    }
+    .expected-end { color: #0c5460; }
+
+    .badge-pdf {
+      font-size: .85rem; min-width: 3rem; text-align: center;
+    }
+    .btn-pdf, .btn-pause {
+      font-size: .85rem;
+    }
+
+    .stage-comment-list {
+      list-style: none; padding: 0; margin-top: .5rem;
+      max-height: 120px; overflow-y: auto;
+    }
+    .stage-comment-list li {
+      background: #f5f5f5; border-radius: 3px;
+      margin-bottom: .25rem; padding: .4rem .6rem;
+    }
+
+    .full-history {
+      margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #dee2e6;
+    }
+    .history-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .5rem; background: #fafafa; border-radius: 4px;
+      margin-bottom: .5rem; position: relative;
+    }
+    .history-datetime { font-size: .85rem; color: #6c757d; margin-bottom: .25rem; }
+    .history-status { font-weight: 600; color: #495057; }
+    .history-actions { position: absolute; top: .5rem; right: .5rem; }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 900px;">
+
+  {# Header #}
+  <div class="company-header card">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h1 class="company-name">{{ company.name }}</h1>
+        <div class="company-meta">
+          <span class="badge bg-info text-dark">
+            <i class="bi bi-geo-alt-fill"></i>&nbsp;{{ company.get_region_display }}
+          </span>
+          {% if company.status %}
+            <span class="badge bg-warning text-dark">
+              <i class="bi bi-gear-fill"></i>&nbsp;{{ company.status.name }}
+            </span>
+            {% if company.status.duration_days > 0 %}
+              <small class="text-muted">(рек.: {{ company.status.duration_days }} дн.)</small>
+            {% endif %}
+          {% else %}
+            <span class="badge bg-secondary">Без статуса</span>
+          {% endif %}
+          {% if days_in_status is not None %}
+            <small class="text-muted">Уже {{ days_in_status }} раб. д.</small>
+          {% endif %}
+        </div>
+      </div>
+      <a href="{% url 'main:edit_company' company.pk %}" class="btn btn-outline-primary btn-sm">
+        Редактировать
+      </a>
+    </div>
+  </div>
+
+  <hr class="my-4">
+
+  {# Next step button #}
+  {% if next_status %}
+    <form id="nextStepForm" method="post" action="{% url 'main:move_company' %}" class="mb-4">
+      {% csrf_token %}
+      <input type="hidden" name="company_id" value="{{ company.pk }}">
+      <input type="hidden" name="status_id"  value="{{ next_status.pk }}">
+      <button class="btn btn-success btn-sm">
+        Перейти к следующему этапу: {{ next_status.name }}
+      </button>
+    </form>
+  {% endif %}
+
+  {# Toggle statuses #}
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h4 class="mb-0">Статусы (этапы)</h4>
+    <button id="toggleStatusesBtn" class="btn btn-sm btn-outline-secondary">
+      Свернуть этапы
+    </button>
+  </div>
+
+  <div id="statusesContainer">
+    <ul class="statuses-list">
+      {% for item in status_info %}
+        {% with st=item.status hist=item.hist %}
+        <li class="status-item
+                   {% if st.id == company.status_id %}
+                     {% if hist.is_paused %}paused{% else %}current{% endif %}
+                   {% elif hist %}passed{% endif %}">
+          <div>
+            <div class="fw-semibold">{{ st.name }}</div>
+            {% if hist %}
+              <div class="status-date">
+                Начало: {{ hist.changed_at|date:"Y-m-d H:i" }} — {{ item.days }} раб. д.
+              </div>
+              {% if st.duration_days > 0 and item.expected_end %}
+                <div class="expected-end">
+                  Ожидаемый конец: {{ item.expected_end|date:"Y-m-d H:i" }}
+                </div>
+              {% endif %}
+            {% endif %}
+          </div>
+
+          <div class="mt-2 d-flex flex-wrap gap-2">
+            <a href="{% url 'main:attach_docs' company.pk st.pk %}"
+               class="btn btn-outline-secondary btn-pdf btn-sm">
+              PDF ({{ item.docs_count }})
+            </a>
+            {% if st.id == company.status_id and hist %}
+              <button
+                type="button"
+                class="btn btn-pause btn-sm {% if hist.is_paused %}btn-success{% else %}btn-warning{% endif %}"
+                data-toggle-url="{% url 'main:toggle_pause' company.pk hist.id %}">
+                {% if hist.is_paused %}↻ Возобновить{% else %}⏸ Пауза{% endif %}
+              </button>
+            {% endif %}
+          </div>
+
+          <ul class="stage-comment-list mt-3">
+            {% for com in item.stage_comments %}
+              <li>
+                <small class="text-muted">{{ com.author.username }}, {{ com.created_at|date:"Y-m-d H:i" }}</small>
+                <div>{{ com.text }}</div>
+              </li>
+            {% empty %}
+              <li class="text-muted">Нет комментариев к этому этапу</li>
+            {% endfor %}
+          </ul>
+
+          <form method="post"
+                action="{% url 'main:add_status_comment' company.pk st.pk %}"
+                class="stage-comment-form mt-2">
+            {% csrf_token %}
+            {{ item.stage_comment_form.text }}
+            <button class="btn btn-outline-secondary btn-pdf btn-sm" type="submit">
+              Оставить комментарий
+            </button>
+          </form>
+        </li>
+        {% endwith %}
+      {% endfor %}
+    </ul>
+  </div>
+
+  {# Company comments #}
+  <h4 class="mt-4">Комментарии к компании</h4>
+  <ul class="list-group mb-4">
+    {% for com in company_comments %}
+      <li class="list-group-item">
+        <small class="text-muted">{{ com.author.username }}, {{ com.created_at|date:"Y-m-d H:i" }}</small>
+        <p class="mb-0">{{ com.text }}</p>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">Нет комментариев к компании</li>
+    {% endfor %}
+  </ul>
+
+  <form method="post" class="mb-5">
+    {% csrf_token %}
+    <input type="hidden" name="company_comment" value="1">
+    <div class="mb-3">
+      {{ form.text.label_tag }}
+      {{ form.text }}
+      {{ form.text.errors }}
+    </div>
+    <button class="btn btn-primary">Добавить комментарий</button>
+  </form>
+
+  {% if request.user.is_staff %}
+    <a href="{% url 'main:add_status_history' company.pk %}"
+       class="btn btn-outline-secondary btn-sm mb-4">
+      Добавить запись в историю
+    </a>
+  {% endif %}
+
+  {# Full history #}
+  <div class="full-history">
+    <h4>История смены статусов</h4>
+    {% for h in full_history %}
+      <div class="history-item">
+        <div>
+          <div class="history-datetime">{{ h.changed_at|date:"Y-m-d H:i" }}</div>
+          <div class="history-status">
+            Этап: {{ h.status.name|default:"Без статуса" }}
+            {% if h.is_paused %}<em class="text-muted">(на паузе)</em>{% endif %}
+          </div>
+        </div>
+        {% if request.user.is_staff %}
+          <div class="history-actions">
+            <a href="{% url 'main:edit_status_history' h.id %}"
+               class="btn btn-outline-secondary btn-sm">✎</a>
+            <form method="post"
+                  action="{% url 'main:delete_status_history' h.id %}"
+                  class="d-inline">{% csrf_token %}
+              <button class="btn btn-outline-danger btn-sm">🗑</button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    {% empty %}
+      <p class="text-muted">Ещё нет записей истории.</p>
+    {% endfor %}
+  </div>
+
+  <button onclick="history.back()" class="btn btn-secondary mt-4">
+    ← Назад
+  </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Toggle statuses visibility
+      const toggleBtn = document.getElementById('toggleStatusesBtn');
+      const container = document.getElementById('statusesContainer');
+      if (toggleBtn && container) {
+        toggleBtn.addEventListener('click', function() {
+          const hidden = container.style.display === 'none';
+          container.style.display = hidden ? '' : 'none';
+          this.textContent = hidden ? 'Свернуть этапы' : 'Показать этапы';
+        });
+      }
+
+      // Pause/resume AJAX
+      document.querySelectorAll('.btn-pause').forEach(btn => {
+        btn.addEventListener('click', async e => {
+          e.preventDefault();
+          const url = btn.dataset.toggleUrl;
+          const csrftoken = document.querySelector('meta[name="csrf-token"]').content;
+          try {
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'X-CSRFToken': csrftoken, 'Accept': 'application/json' }
+            });
+            const data = await res.json();
+            if (data.result !== 'ok') throw '';
+            btn.textContent = data.is_paused ? '↻ Возобновить' : '⏸ Пауза';
+            btn.classList.toggle('btn-outline-success', data.is_paused);
+            btn.classList.toggle('btn-outline-warning', !data.is_paused);
+            const li = btn.closest('li.status-item');
+            li.classList.toggle('paused', data.is_paused);
+            li.classList.toggle('current', !data.is_paused);
+          } catch {
+            alert('Ошибка при переключении паузы');
+          }
+        });
+      });
+
+      // Next step AJAX
+      const nextForm = document.getElementById('nextStepForm');
+      if (nextForm) {
+        nextForm.addEventListener('submit', async e => {
+          e.preventDefault();
+          const csrftoken = document.querySelector('meta[name="csrf-token"]').content;
+          const data = new URLSearchParams(new FormData(nextForm));
+          try {
+            const res = await fetch(nextForm.action, {
+              method: 'POST',
+              headers: { 'X-CSRFToken': csrftoken, 'Accept': 'application/json' },
+              body: data
+            });
+            const json = await res.json();
+            if (json.result !== 'ok') throw '';
+            const notice = document.createElement('div');
+            notice.className = 'alert alert-success mt-3';
+            notice.textContent = 'Статус изменён! Пожалуйста, обновите страницу.';
+            nextForm.after(notice);
+          } catch {
+            const notice = document.createElement('div');
+            notice.className = 'alert alert-danger mt-3';
+            notice.textContent = 'Не удалось перейти к следующему этапу.';
+            nextForm.after(notice);
+          }
+        });
+      }
+    });
+  </script>
+{% endblock %}

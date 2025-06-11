@@ -1,0 +1,267 @@
+{# templates/main/companies_table.html #}
+{% extends 'main/base.html' %}
+{% block title %}Табличный обзор: Компании и Статусы{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* ─── «ЛИПКИЙ» ЛЕВЫЙ СТОЛБЕЦ ───────────────────────────────────── */
+    .sticky-col {
+      position: -webkit-sticky;
+      position: sticky;
+      left: 0;
+      background-color: #ffffff;
+      z-index: 2;            /* Поверх остальных ячеек при скролле */
+      min-width: 200px;      /* Минимальная ширина первой колонки */
+    }
+
+    /* ─── ФЕЙКОВЫЙ СКРОЛЛБАР (над таблицей) ────────────────────────── */
+    .table-scroll-wrapper {
+      position: relative;
+    }
+    /* «Пустой» блок, который рисует полосу прокрутки */
+    .fake-scrollbar {
+      height: 8px;           /* Высота «узкой» полосы прокрутки */
+      overflow-x: auto;
+      overflow-y: hidden;    /* Чтобы не сдвигать остальные элементы страницы вниз */
+    }
+    /* Содержимое фейкового скролла — ровно такая же ширина, как у самой таблицы */
+    .fake-scrollbar .scroll-content {
+      width: 0;              /* JS установит правильную ширину */
+      height: 1px;           /* Достаточно хоть 1px по высоте для появления полосы */
+    }
+
+    /* ─── КОНТЕЙНЕР ДЛЯ ТАБЛИЦЫ ─────────────────────────────────────── */
+    .table-responsive {
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+    /* Уменьшаем высоту строк, чтобы клетки с ✓/→/! не тянулись слишком высоко */
+    .table-responsive table td,
+    .table-responsive table th {
+      padding: 0.4rem 0.6rem;
+    }
+    /* Совсем убираем паддинги в «символьных» ячейках */
+    .table-responsive td.no-pad {
+      padding: 0 !important;
+    }
+    .table-responsive td.no-pad a {
+      line-height: 2.2rem;             /* Чуть меньше, чем 2.5em */
+      display: block;
+      width: 100%;
+      height: 100%;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+      border-radius: 4px;
+    }
+    .table-responsive td.no-pad a:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: scale(1.1);
+    }
+
+    /* ─── «ПРОЙДЕННЫЙ» СВЕТЛО-ЗЕЛЁНЫЙ ───────────────────────────────── */
+    .bg-success-light {
+      background-color: #c3e6cb !important; /* светло-зеленый фон */
+      color: #155724 !important;            /* тёмно-зеленый текст */
+    }
+    .bg-success-light a {
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    .bg-success-light a:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: scale(1.1);
+    }
+
+    /* ─── «ТЕКУЩИЙ» ЖЁЛТЫЙ ───────────────────────────────────────────── */
+    .table-responsive td.bg-warning a {
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    .table-responsive td.bg-warning a:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: scale(1.1);
+    }
+
+    /* ─── ЗАГОЛОВКИ СТАТУСОВ ───────────────────────────────────────── */
+    th.status-header {
+      min-width: 160px;      /* Немного больше, чтобы текст не резался */
+      max-width: 200px;
+      white-space: nowrap;   /* Не переносить внутри одного слова */
+      overflow: hidden;      /* Скрываем переполнение */
+      text-overflow: ellipsis; /* «...» при нехватке места */
+      padding: 0.6rem 0.8rem;
+      font-size: 0.9rem;
+      vertical-align: bottom;
+      text-align: center;
+    }
+
+    /* ─── СКРОЛЛБАР ПО МОТИВАМ ─────────────────────────────────────── */
+    .table-responsive::-webkit-scrollbar {
+      height: 8px;
+    }
+    .table-responsive::-webkit-scrollbar-thumb {
+      background-color: rgba(0,0,0,0.2);
+      border-radius: 4px;
+    }
+    .table-responsive::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+
+    /* ─── ПЛАВНОЕ ПОЯВЛЕНИЕ ЯЧЕЕК ПРИ ЗАГРУЗКЕ ───────────────────────── */
+    @keyframes fadeInCell {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .table-responsive td,
+    .table-responsive th {
+      animation: fadeInCell 0.3s ease;
+    }
+  </style>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const wrapper       = document.querySelector('.table-scroll-wrapper');
+      const fakeScrollbar = document.querySelector('.fake-scrollbar');
+      const scrollContent = document.querySelector('.fake-scrollbar .scroll-content');
+      const tableResp     = document.querySelector('.table-responsive');
+      const mainTable     = document.getElementById('mainTable');
+
+      if (!wrapper || !fakeScrollbar || !scrollContent || !tableResp || !mainTable) return;
+
+      // 1) Устанавливаем ширину «scroll-content» = полной ширине таблицы
+      function syncScrollWidth() {
+        const fullWidth = mainTable.scrollWidth;
+        scrollContent.style.width = fullWidth + 'px';
+      }
+      syncScrollWidth();
+      window.addEventListener('resize', syncScrollWidth);
+
+      // 2) При прокрутке «фейкового» скроллбара — синхронизируем реальный
+      fakeScrollbar.addEventListener('scroll', function() {
+        tableResp.scrollLeft = fakeScrollbar.scrollLeft;
+      });
+      // 3) При прокрутке реальной таблицы — двигаем «фейковый»
+      tableResp.addEventListener('scroll', function() {
+        fakeScrollbar.scrollLeft = tableResp.scrollLeft;
+      });
+    });
+  </script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h1>Табличный обзор: Компании и Статусы</h1>
+
+  <!-- ─── Форма фильтров ──────────────────────────────────────────── -->
+  <form method="get" class="row gy-2 gx-2 align-items-center mb-4">
+    <div class="col-auto">
+      <input
+        type="text"
+        name="q"
+        value="{{ q }}"
+        class="form-control"
+        placeholder="Поиск по названию..."
+      >
+    </div>
+    <div class="col-auto form-check">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        name="overdue"
+        id="overdueCheck"
+        value="1"
+        {% if overdue_filter %}checked{% endif %}
+      >
+      <label class="form-check-label" for="overdueCheck">
+        Только просроченные
+      </label>
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary">Применить</button>
+    </div>
+  </form>
+
+  <!--
+    ─── ОБЕРТКА СО «ФЕЙКОВОЙ» ПОЛОСОЙ ПРОКРУТКИ ───────────────────────
+    Сначала рисуем div.fake-scrollbar (его ширину задаст JS), а ниже — таблицу.
+  -->
+  <div class="table-scroll-wrapper">
+    <!-- «Фейковая» область прокрутки: -->
+    <div class="fake-scrollbar">
+      <div class="scroll-content"></div>
+    </div>
+
+    <!-- Реальная прокручиваемая таблица: -->
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle mb-0" id="mainTable">
+        <thead class="table-light">
+          <tr>
+            <th class="sticky-col" scope="col">Компания</th>
+            {% for status in statuses %}
+              <th class="status-header" scope="col" title="{{ status.name }}">
+                {{ status.name }}
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for company in companies %}
+            <tr>
+              <!-- «Липкий» столбец с основной инфой о компании -->
+              <td class="sticky-col" style="vertical-align: middle; background-color: #ffffff;">
+                <a href="{% url 'main:company_detail' company.pk %}">
+                  <strong>{{ company.name }}</strong>
+                </a>
+                <br>
+                <small class="text-muted">
+                  Сумма долга:
+                  {% if company.debt_amount %}{{ company.debt_amount }}{% else %}—{% endif %}
+                </small>
+                <br>
+                <small class="text-muted">
+                  Управляющий:
+                  {% if company.manager_name %}{{ company.manager_name }}{% else %}—{% endif %}
+                </small>
+              </td>
+
+              {% for status in statuses %}
+                {% if status.order < company.max_reached %}
+                  <!-- ПРОЙДЕННЫЙ ЭТАП: светло-зеленый фон -->
+                  <td class="text-center bg-success-light no-pad">
+                    <a href="{% url 'main:attach_docs' company.pk status.pk %}">✓</a>
+                  </td>
+                {% elif status.order == company.max_reached %}
+                  {% if company.is_overdue %}
+                    <!-- ПРОСРОЧЕННЫЙ ТЕКУЩИЙ: красный фон -->
+                    <td class="text-center bg-danger text-white no-pad">
+                      <a href="{% url 'main:attach_docs' company.pk status.pk %}">!</a>
+                    </td>
+                  {% else %}
+                    <!-- ТЕКУЩИЙ НЕ ПРОСРОЧЕННЫЙ: желтый фон -->
+                    <td class="text-center bg-warning text-dark no-pad">
+                      <a href="{% url 'main:attach_docs' company.pk status.pk %}">→</a>
+                    </td>
+                  {% endif %}
+                {% else %}
+                  <!-- ЕЩЁ НЕ ДОСТИГНУТЫЙ -->
+                  <td class="text-center no-pad">
+                    <a href="{% url 'main:attach_docs' company.pk status.pk %}"></a>
+                  </td>
+                {% endif %}
+              {% endfor %}
+
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="{{ statuses|length|add:'1' }}" class="text-center">
+                Нет компаний для отображения.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div> <!-- /.table-responsive -->
+  </div> <!-- /.table-scroll-wrapper -->
+</div>
+{% endblock %}

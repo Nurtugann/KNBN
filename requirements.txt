@@ -1,0 +1,6 @@
+Django==5.1.9
+django-environ
+django-filter
+whitenoise
+psycopg2-binary
+psycopg2

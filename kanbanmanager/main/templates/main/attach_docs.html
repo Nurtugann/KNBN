@@ -1,0 +1,84 @@
+{# templates/main/attach_docs.html #}
+{% extends 'main/base.html' %}
+{% block title %}Документы для {{ company.name }} — {{ status.name }}{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* (Опционально) Подправим чуть-чуть отступы */
+    .file-input-label {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+    .existing-docs-list li a {
+      text-decoration: none;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 700px;">
+  <h2>Документы для компании «{{ company.name }}»</h2>
+  <h4>Этап: {{ status.name }}</h4>
+  <hr>
+
+  {# 1. Список уже загруженных документов #}
+  <h5 class="mt-3">Загруженные файлы</h5>
+  {% if docs %}
+    <ul class="list-group existing-docs-list mb-4">
+      {% for doc in docs %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <a href="{{ doc.file.url }}" target="_blank" class="me-3">
+            {{ doc.file.name|cut:"company_status_docs/" }}
+          </a>
+          <span class="badge bg-secondary me-3">
+            {{ doc.uploaded_at|date:"Y-m-d H:i" }}
+          </span>
+          <form
+            method="post"
+            action="{% url 'main:delete_doc' company.pk status.pk doc.pk %}"
+            style="margin: 0;"
+          >
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="btn btn-sm btn-outline-danger"
+              onclick="return confirm('Вы уверены, что хотите удалить этот файл?');"
+            >
+              Удалить
+            </button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted mb-4">Ещё нет загруженных файлов.</p>
+  {% endif %}
+
+  {# 2. Форма для загрузки нескольких файлов #}
+  <h5 class="mt-4">Загрузить новые документы (PDF)</h5>
+  <form method="post" enctype="multipart/form-data" class="mb-5">
+    {% csrf_token %}
+    {# Явно выведем label и input для “files” #}
+    <label for="id_files" class="file-input-label">Выберите PDF-файлы (можно несколько):</label>
+    <input
+      type="file"
+      name="files"
+      id="id_files"
+      multiple
+      accept="application/pdf"
+      class="form-control mb-1"
+    >
+    {% if form.errors.files %}
+      <div class="text-danger small mb-2">
+        {{ form.errors.files.as_text|linebreaksbr }}
+      </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">Загрузить выбранные</button>
+    <a href="{% url 'main:company_detail' company.pk %}" class="btn btn-secondary ms-2">
+      ← Назад к карточке
+    </a>
+  </form>
+</div>
+{% endblock %}

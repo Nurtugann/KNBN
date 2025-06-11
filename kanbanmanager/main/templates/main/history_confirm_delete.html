@@ -1,0 +1,34 @@
+{# templates/main/history_confirm_delete.html #}
+{% extends 'main/base.html' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 600px;">
+  <h1 class="mb-4">{{ title }}</h1>
+
+  <p>
+    Вы действительно хотите удалить запись истории:<br>
+    <strong>Компания:</strong> {{ company.name }}<br>
+    <strong>Статус:</strong>
+      {% if history.status %}
+        {{ history.status.name }}
+      {% else %}
+        Без статуса
+      {% endif %}<br>
+    <strong>Дата изменения:</strong> {{ history.changed_at|date:"Y-m-d H:i" }}
+  </p>
+
+  <form method="post" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">
+      Да, удалить
+    </button>
+  </form>
+  <a href="{% url 'main:company_detail' company.pk %}" class="btn btn-secondary ms-2">
+    Отмена
+  </a>
+</div>
+{% endblock %}

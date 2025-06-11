@@ -1,0 +1,72 @@
+{# main/templates/main/company_form.html #}
+{% extends 'main/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 600px;">
+  <h1 class="mb-4">{{ title }}</h1>
+  <form method="post">
+    {% csrf_token %}
+
+    {# 1) Название компании #}
+    <div class="mb-3">
+      <label for="{{ form.name.id_for_label }}" class="form-label">Название компании</label>
+      {{ form.name }}
+      {% if form.name.errors %}
+        <div class="text-danger">{{ form.name.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    {# 2) БИН (необязательное) #}
+    <div class="mb-3">
+      <label for="{{ form.bin_number.id_for_label }}" class="form-label">БИН</label>
+      {{ form.bin_number }}
+      <div class="form-text">Необязательное поле</div>
+      {% if form.bin_number.errors %}
+        <div class="text-danger">{{ form.bin_number.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    {# 3) Управляющий (необязательное) #}
+    <div class="mb-3">
+      <label for="{{ form.manager_name.id_for_label }}" class="form-label">Управляющий</label>
+      {{ form.manager_name }}
+      <div class="form-text">Необязательное поле</div>
+      {% if form.manager_name.errors %}
+        <div class="text-danger">{{ form.manager_name.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    {# 4) Сумма долга (необязательное) #}
+    <div class="mb-3">
+      <label for="{{ form.debt_amount.id_for_label }}" class="form-label">Сумма долга</label>
+      {{ form.debt_amount }}
+      <div class="form-text">Необязательное поле (число в формате 1234.56)</div>
+      {% if form.debt_amount.errors %}
+        <div class="text-danger">{{ form.debt_amount.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    {# 5) Текущий статус компании #}
+    <div class="mb-3">
+      <label for="{{ form.status.id_for_label }}" class="form-label">Текущий статус</label>
+      {{ form.status }}
+      {% if form.status.errors %}
+        <div class="text-danger">{{ form.status.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    {# 6) Регион #}
+    <div class="mb-3">
+      <label for="{{ form.region.id_for_label }}" class="form-label">Регион</label>
+      {{ form.region }}
+      {% if form.region.errors %}
+        <div class="text-danger">{{ form.region.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a href="{% url 'main:index' %}" class="btn btn-secondary ms-2">← Назад</a>
+  </form>
+</div>
+{% endblock %}

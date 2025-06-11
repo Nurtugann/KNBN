@@ -1,0 +1,860 @@
+# main/views.py
+
+import json
+from datetime import timedelta
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from django.db.models import Count, Subquery, OuterRef, Max, IntegerField, Value
+from django.db.models.functions import Coalesce, Greatest
+
+from .models import (
+    Company,
+    Status,
+    CompanyStatusHistory,
+    Comment,
+    Profile,
+    CompanyStatusDocument,
+    Region,
+    REGION_CHOICES,
+)
+from .forms import (
+    CompanyForm,
+    CompanyStatusHistoryForm,
+    CommentForm,
+    CompanyStatusDocumentForm,
+    SignUpForm,
+)
+
+
+def count_workdays(start_dt, end_dt):
+    """
+    Считает число рабочих дней (Mon–Fri) между двумя datetime.
+    """
+    start_date = start_dt.date()
+    end_date = end_dt.date()
+    workdays = 0
+    current = start_date
+    while current < end_date:
+        if current.weekday() < 5:
+            workdays += 1
+        current += timedelta(days=1)
+    return workdays
+
+
+@login_required
+def profile(request):
+    user = request.user
+
+    # 1) Базовый queryset c учётом прав (staff vs не-staff)
+    if user.is_staff:
+        qs = Company.objects.all()
+    else:
+        user_regions = user.profile.regions.values_list('code', flat=True)
+        qs = Company.objects.filter(region__in=user_regions)
+
+    now = timezone.now()
+
+    overdue_list = []
+    almost_overdue_list = []
+
+    # 2) Проходим по всем компаниям и считаем необходимые показатели
+    for c in qs:
+        last_hist = c.history.first()
+
+        c.days_in_status = None
+        c.is_overdue = False
+        c.days_left = None
+
+        if last_hist and c.status and c.status.duration_days:
+            passed = count_workdays(last_hist.changed_at, now)
+            c.days_in_status = passed
+
+            duration = c.status.duration_days
+
+            if passed > duration:
+                c.is_overdue = True
+            else:
+                c.is_overdue = False
+                c.days_left = duration - passed
+
+        if c.is_overdue:
+            overdue_list.append(c)
+        elif c.days_left is not None and c.days_left <= 1:
+            almost_overdue_list.append(c)
+
+    # 3) Статистика по статусам
+    by_status = (
+        qs.values('status__name')
+          .annotate(count=Count('id'))
+          .order_by('status__name')
+    )
+
+    total = qs.count()
+    overdue = len(overdue_list)
+
+    return render(request, 'main/profile.html', {
+        'title':               'Личный кабинет',
+        'total':               total,
+        'overdue':             overdue,
+        'by_status':           by_status,
+        'almost_overdue_list': almost_overdue_list,
+        'overdue_list':        overdue_list,
+    })
+
+
+def add_workdays(start_dt, workdays_to_add):
+    """
+    Прибавить к дате start_dt указанное количество рабочих дней (Mon–Fri).
+    Возвращает datetime (с тем же временем суток).
+    """
+    current = start_dt
+    added = 0
+    while added < workdays_to_add:
+        current += timedelta(days=1)
+        if current.weekday() < 5:
+            added += 1
+    return current
+
+
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+
+from .models import Company, Status, CompanyStatusHistory, CompanyStatusDocument, Comment
+from .forms  import CommentForm
+
+@login_required
+def company_detail(request, pk):
+    """
+    Просмотр детали компании + комментарии, пауза/возобновить, история,
+    и кнопка перехода к следующему этапу.
+    """
+    company = get_object_or_404(Company, pk=pk)
+
+    # 0) Дни в текущем статусе
+    last_change = company.history.first()
+    days_in_status = None
+    if last_change and company.status and company.status.duration_days:
+        days_in_status = count_workdays(last_change.changed_at, timezone.now())
+
+    # 1) Комментарий к компании
+    if request.method == 'POST' and 'company_comment' in request.POST:
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            com = form.save(commit=False)
+            com.company = company
+            com.author = request.user
+            com.save()
+            return redirect('main:company_detail', pk=pk)
+    else:
+        form = CommentForm()
+
+    # 2) Собираем статус-инфо
+    statuses = Status.objects.order_by('order')
+    status_info = []
+    now = timezone.now()
+    for st in statuses:
+        hist = CompanyStatusHistory.objects.filter(company=company, status=st)\
+                                          .order_by('-changed_at').first()
+        workdays = count_workdays(hist.changed_at, now) if hist and st.duration_days else None
+        is_over  = bool(workdays and st.duration_days and workdays > st.duration_days)
+        docs_count = CompanyStatusDocument.objects.filter(company=company, status=st).count()
+        expected_end = add_workdays(hist.changed_at, st.duration_days) if hist and st.duration_days else None
+        stage_comments     = Comment.objects.filter(company=company, status=st).order_by('created_at')
+        stage_comment_form = CommentForm()
+        overall_last = CompanyStatusHistory.objects.filter(company=company).order_by('-changed_at').first()
+        can_edit = bool(hist and overall_last and hist.id == overall_last.id)
+
+        status_info.append({
+            'status':             st,
+            'hist':               hist,
+            'days':               workdays,
+            'overdue':            is_over,
+            'docs_count':         docs_count,
+            'is_current':         company.status_id == st.id,
+            'can_edit':           can_edit,
+            'expected_end':       expected_end,
+            'stage_comments':     stage_comments,
+            'stage_comment_form': stage_comment_form,
+        })
+
+    # 3) Общие комментарии
+    company_comments = Comment.objects.filter(company=company, status__isnull=True)\
+                                      .order_by('created_at')
+
+    # 4) Полная история
+    full_history = CompanyStatusHistory.objects.filter(company=company)\
+                                              .order_by('-changed_at')
+
+    # 5) Вычисляем next_status
+    ordered = list(statuses)
+    current_order = company.status.order if company.status else -1
+    next_status = None
+    for st in ordered:
+        if st.order > current_order:
+            next_status = st
+            break
+
+    return render(request, 'main/company_detail.html', {
+        'company':          company,
+        'days_in_status':   days_in_status,
+        'form':             form,
+        'status_info':      status_info,
+        'company_comments': company_comments,
+        'full_history':     full_history,
+        'next_status':      next_status,
+    })
+
+
+
+@login_required
+@require_POST
+def add_status_comment(request, company_id, status_id):
+    """
+    Эндпоинт для POST-запроса из формы «Добавить комментарий к этапу».
+    """
+    company = get_object_or_404(Company, pk=company_id)
+    status = get_object_or_404(Status, pk=status_id)
+
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        com = form.save(commit=False)
+        com.company = company
+        com.status = status
+        com.author = request.user
+        com.save()
+    return redirect('main:company_detail', pk=company_id)
+
+
+@login_required
+@require_POST
+def toggle_pause(request, company_id, history_id):
+    """
+    Переключает паузу (is_paused) для конкретной записи CompanyStatusHistory.
+    """
+    hist = get_object_or_404(
+        CompanyStatusHistory,
+        pk=history_id,
+        company_id=company_id
+    )
+    if hist.is_paused:
+        hist.is_paused = False
+        hist.paused_at = None
+    else:
+        hist.is_paused = True
+        hist.paused_at = timezone.now()
+    hist.save(update_fields=['is_paused', 'paused_at'])
+
+    return JsonResponse({
+        'result':    'ok',
+        'is_paused': hist.is_paused,
+        'paused_at': hist.paused_at.strftime("%Y-%m-%d %H:%M") if hist.paused_at else '',
+    })
+
+
+@login_required
+@require_POST
+def move_company(request):
+    """
+    Перемещение компании между статусами (Kanban).
+    """
+    cid = request.POST.get('company_id')
+    sid = request.POST.get('status_id') or None
+
+    if request.user.is_staff:
+        qs = Company.objects
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        qs = Company.objects.filter(region__in=user_regions)
+
+    company = get_object_or_404(qs, pk=cid)
+    old_status = company.status
+    old_order  = old_status.order if old_status else None
+
+    new_status = get_object_or_404(Status, pk=sid) if sid else None
+    new_order  = new_status.order if new_status else None
+
+    # Запрет на «откат назад» для обычных пользователей
+    if not request.user.is_staff and old_order is not None and new_order is not None:
+        if new_order < old_order:
+            return JsonResponse({
+                'result':  'error',
+                'message': 'Вы не можете перевести компанию на более ранний этап.'
+            }, status=403)
+
+    # Если ничего не изменилось, сразу выходим
+    if (old_status is None and new_status is None) or (
+       old_status is not None and new_status is not None and old_status.id == new_status.id):
+        return JsonResponse({'result': 'ok'})
+
+    now = timezone.now()
+
+    # 1) Если перескакиваем через несколько этапов вперед
+    if old_status and new_status and new_order is not None and old_order is not None:
+        if new_order > old_order + 1:
+            skipped_statuses = Status.objects.filter(
+                order__gt=old_order, order__lt=new_order
+            ).order_by('order')
+            for skipped in skipped_statuses:
+                CompanyStatusHistory.objects.create(
+                    company=company,
+                    status=skipped,
+                    changed_at=now
+                )
+
+    # 2) Создаём запись истории для нового статуса и сохраняем его
+    CompanyStatusHistory.objects.create(company=company, status=new_status, changed_at=now)
+    company.status = new_status
+    company.save(update_fields=['status'])
+
+    return JsonResponse({'result': 'ok'})
+
+
+@login_required
+@require_POST
+def reorder_companies(request):
+    """
+    Сохранение нового порядка компаний в колонке (Kanban).
+    """
+    payload = json.loads(request.body)
+    sid = payload.get('status_id') or None
+    new_order_ids = payload.get('order', [])
+
+    new_status = get_object_or_404(Status, pk=sid) if sid else None
+    new_order_value = new_status.order if new_status else None
+
+    if request.user.is_staff:
+        base_qs = Company.objects
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        base_qs = Company.objects.filter(region__in=user_regions)
+
+    now = timezone.now()
+
+    for idx, cid in enumerate(new_order_ids):
+        try:
+            company = base_qs.get(pk=cid)
+        except Company.DoesNotExist:
+            continue
+
+        old_status = company.status
+        old_order  = old_status.order if old_status else None
+
+        # 1) Запрет «отката назад»
+        if not request.user.is_staff and old_order is not None and new_order_value is not None:
+            if new_order_value < old_order:
+                continue
+
+        # 2) Проверяем, изменился ли статус
+        status_changed = False
+        if old_status is None and new_status is not None:
+            status_changed = True
+        elif old_status is not None and new_status is None:
+            status_changed = True
+        elif old_status is not None and new_status is not None and old_status.id != new_status.id:
+            status_changed = True
+
+        # 3) Если перескакиваем через несколько этапов вперед — создаём промежуточные записи
+        if status_changed and old_status and new_status:
+            if new_order_value > old_order + 1:
+                skipped_statuses = Status.objects.filter(
+                    order__gt=old_order, order__lt=new_order_value
+                ).order_by('order')
+                for skipped in skipped_statuses:
+                    CompanyStatusHistory.objects.create(
+                        company=company,
+                        status=skipped,
+                        changed_at=now
+                    )
+
+        # 4) Сохраняем новый статус и позицию
+        company.status   = new_status
+        company.position = idx
+        company.save(update_fields=['status', 'position'])
+
+        # 5) Если статус изменился — создаём историю
+        if status_changed:
+            CompanyStatusHistory.objects.create(company=company, status=new_status, changed_at=now)
+
+    return JsonResponse({'result': 'ok'})
+
+
+@login_required
+def index(request):
+    if request.user.is_staff:
+        qs = Company.objects.all()
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        qs = Company.objects.filter(region__in=user_regions)
+
+    q       = request.GET.get('q', '').strip()
+    st_id   = request.GET.get('status')
+    region  = request.GET.get('region')
+    overdue = request.GET.get('overdue') == '1'
+
+    if q:
+        qs = qs.filter(name__icontains=q)
+    if st_id:
+        qs = qs.filter(status_id=st_id)
+    if request.user.is_staff and region:
+        qs = qs.filter(region=region)
+
+    companies = []
+    now = timezone.now()
+
+    for c in qs.order_by('position'):
+        last = c.history.first()
+        if last and c.status and c.status.duration_days:
+            workdays_elapsed = count_workdays(last.changed_at, now)
+            is_overdue       = workdays_elapsed > c.status.duration_days
+            days_in_status   = workdays_elapsed
+        else:
+            is_overdue     = False
+            days_in_status = None
+
+        if overdue and not is_overdue:
+            continue
+
+        c.days_in_status = days_in_status
+        c.is_overdue     = is_overdue
+        companies.append(c)
+
+    return render(request, 'main/index.html', {
+        'title':    'Список компаний',
+        'companies': companies,
+        'statuses': Status.objects.order_by('order'),
+        'regions':  REGION_CHOICES,
+    })
+
+
+@login_required
+def board(request):
+    if request.user.is_staff:
+        qs = Company.objects.all().order_by('position')
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        qs = Company.objects.filter(region__in=user_regions).order_by('position')
+
+    companies = list(qs)
+    statuses  = list(Status.objects.order_by('order'))
+    now = timezone.now()
+
+    for c in companies:
+        last = c.history.first()
+        if last and c.status and c.status.duration_days:
+            workdays_elapsed = count_workdays(last.changed_at, now)
+            c.is_overdue = (workdays_elapsed > c.status.duration_days)
+        else:
+            c.is_overdue = False
+
+    if request.GET.get('overdue') == '1':
+        companies = [c for c in companies if c.is_overdue]
+
+    groups = {st.id: [] for st in statuses}
+    groups[None] = []
+    for c in companies:
+        groups.setdefault(c.status_id, []).append(c)
+
+    board_data = [(st, groups.get(st.id, [])) for st in statuses]
+    if groups.get(None):
+        board_data.append((None, groups.get(None)))
+
+    half_index = len(board_data) // 2
+    board_data1 = board_data[:half_index]
+    board_data2 = board_data[half_index:]
+
+    return render(request, 'main/board.html', {
+        'title':       'Kanban Board',
+        'board_data1': board_data1,
+        'board_data2': board_data2,
+    })
+
+
+@login_required
+def add_company(request):
+    if request.method == 'POST':
+        form = CompanyForm(request.POST, user=request.user)
+        if form.is_valid():
+            c = form.save(commit=False)
+            if not request.user.is_staff:
+                regions = request.user.profile.regions.values_list('code', flat=True)
+                if regions:
+                    c.region = regions[0]
+            c.save()
+
+            # Если при создании сразу задан статус — создаём запись истории:
+            if c.status is not None:
+                CompanyStatusHistory.objects.create(
+                    company=c,
+                    status=c.status
+                )
+
+            return redirect('main:index')
+    else:
+        form = CompanyForm(user=request.user)
+
+    return render(request, 'main/company_form.html', {
+        'title': 'Добавить компанию',
+        'form':  form,
+    })
+
+
+# main/views.py
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+from .models import Company, Status
+from .forms import CompanyForm
+
+@login_required
+def edit_company(request, pk):
+    """
+    Редактирование компании.
+    Если пользователь не staff, запрещаем выбирать в поле "status"
+    статус с меньшим order (т. е. «ехать назад»).
+    """
+    # --------------------------
+    # 1) Получаем объект компании
+    # --------------------------
+    if request.user.is_staff:
+        company = get_object_or_404(Company, pk=pk)
+    else:
+        # Обычный пользователь может редактировать только в своём регионе
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        company = get_object_or_404(Company, pk=pk, region__in=user_regions)
+
+    # Запомним старый статус и его order (или None/−1, если статуса нет)
+    old_status = company.status
+    old_order = old_status.order if old_status else -1
+
+    # ------------------------------------------------
+    # 2) Обработка POST-запроса: проверяем «откат назад»
+    # ------------------------------------------------
+    if request.method == 'POST':
+        # Передаём user=request.user в форму, чтобы она правильно работала
+        form = CompanyForm(request.POST, instance=company, user=request.user)
+        if form.is_valid():
+            # Получили «новый» статус из формы
+            new_status = form.cleaned_data.get('status')
+            new_order = new_status.order if new_status else -1
+
+            # Если пользователь не staff и пытается «ехать назад» (new_order < old_order)
+            if not request.user.is_staff and new_order < old_order:
+                # Выводим сообщение об ошибке и возвращаем форму без сохранения
+                messages.error(
+                    request,
+                    "Вы не можете изменить статус на более ранний этап."
+                )
+                # Просто рендерим тот же шаблон с формой (с уже введёнными данными и ошибкой)
+                return render(request, 'main/company_form.html', {
+                    'title': 'Редактировать компанию',
+                    'form': form,
+                })
+
+            # Если проверка пройдена, сохраняем изменения
+            c = form.save(commit=False)
+            # Для обычных пользователей фиксируем регион (если они не могут его менять)
+            if not request.user.is_staff:
+                user_regions = request.user.profile.regions.values_list('code', flat=True)
+                if user_regions:
+                    c.region = user_regions[0]
+            c.save()
+            messages.success(request, "Компания успешно сохранена.")
+            return redirect('main:index')
+    else:
+        # GET-запрос: просто показываем заполненную форму
+        form = CompanyForm(instance=company, user=request.user)
+
+    return render(request, 'main/company_form.html', {
+        'title': 'Редактировать компанию',
+        'form': form,
+    })
+
+
+@login_required
+def delete_company(request, pk):
+    if request.user.is_staff:
+        company = get_object_or_404(Company, pk=pk)
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        company = get_object_or_404(Company, pk=pk, region__in=user_regions)
+
+    if request.method == 'POST':
+        company.delete()
+        return redirect('main:index')
+
+    return render(request, 'main/company_confirm_delete.html', {
+        'title':   'Удалить компанию',
+        'company': company,
+    })
+
+
+@login_required
+def add_status_history(request, company_id):
+    """
+    Форма «Добавить историю»: создаёт запись в CompanyStatusHistory 
+    и обновляет поле company.status.
+    """
+    if request.user.is_staff:
+        company = get_object_or_404(Company, pk=company_id)
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        company = get_object_or_404(Company, pk=company_id, region__in=user_regions)
+
+    if request.method == 'POST':
+        form = CompanyStatusHistoryForm(request.POST)
+        if form.is_valid():
+            h = form.save(commit=False)
+            h.company = company
+            h.save()
+            company.status = h.status
+            company.save(update_fields=['status'])
+            return redirect('main:company_detail', pk=company_id)
+    else:
+        form = CompanyStatusHistoryForm()
+
+    return render(request, 'main/history_form.html', {
+        'title':   f'Добавить историю для {company.name}',
+        'form':    form,
+        'company': company,
+    })
+
+
+# main/views.py
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+from .models import CompanyStatusHistory, Status
+from .forms import CompanyStatusHistoryForm
+
+@login_required
+def edit_status_history(request, history_id):
+    """
+    Редактирование записи истории CompanyStatusHistory.
+    Запрет для обычных (не-staff) пользователей переключаться «назад».
+    """
+    if request.user.is_staff:
+        h = get_object_or_404(CompanyStatusHistory, pk=history_id)
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        h = get_object_or_404(
+            CompanyStatusHistory,
+            pk=history_id,
+            company__region__in=user_regions
+        )
+
+    # Сохраним текущий порядок статуса, чтобы сравнить после изменений
+    old_status = h.status
+    old_order = old_status.order if old_status else -1
+
+    if request.method == 'POST':
+        form = CompanyStatusHistoryForm(request.POST, instance=h)
+        if form.is_valid():
+            new_status = form.cleaned_data['status']
+            new_order = new_status.order if new_status else -1
+
+            # Если пользователь не является staff, запрещаем менять на статус с меньшим order
+            if not request.user.is_staff and new_order < old_order:
+                messages.error(request, "Вы не можете изменить запись истории на более ранний статус.")
+                return redirect('main:company_detail', pk=h.company.pk)
+
+            # Сохраняем изменения (в том числе, если просто изменили changed_at)
+            form.save()
+            messages.success(request, "Запись истории успешно обновлена.")
+            return redirect('main:company_detail', pk=h.company.pk)
+    else:
+        form = CompanyStatusHistoryForm(instance=h)
+
+    return render(request, 'main/history_form.html', {
+        'title': f'Редактировать историю для {h.company.name}',
+        'form': form,
+        'company': h.company,
+    })
+
+
+@login_required
+def delete_status_history(request, history_id):
+    """
+    Удаляет запись истории, если она не является последней для компании.
+    """
+    if request.user.is_staff:
+        h = get_object_or_404(CompanyStatusHistory, pk=history_id)
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        h = get_object_or_404(
+            CompanyStatusHistory,
+            pk=history_id,
+            company__region__in=user_regions
+        )
+
+    company = h.company
+    latest = CompanyStatusHistory.objects.filter(company=company).order_by('-changed_at').first()
+    if h.pk == latest.pk:
+        messages.error(request, "Нельзя удалить текущую запись истории.")
+        return redirect('main:company_detail', pk=company.pk)
+
+    if request.method == 'POST':
+        h.delete()
+        messages.success(request, "Запись истории удалена.")
+        return redirect('main:company_detail', pk=company.pk)
+
+    return render(request, 'main/history_confirm_delete.html', {
+        'title':   f'Удалить историю для «{company.name}»',
+        'history': h,
+        'company': company,
+    })
+
+
+def signup(request):
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("main:index")
+    else:
+        form = SignUpForm()
+    return render(request, "main/signup.html", {"form": form, "title": "Регистрация"})
+
+
+@login_required
+def companies_table(request):
+    q = request.GET.get('q', '').strip()
+    overdue_filter = request.GET.get('overdue') == '1'
+
+    statuses = Status.objects.all().order_by('order')
+
+    if request.user.is_staff:
+        companies_qs = Company.objects.all()
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        companies_qs = Company.objects.filter(region__in=user_regions)
+
+    companies_qs = companies_qs.select_related('status')
+
+    max_order_subquery = CompanyStatusHistory.objects.filter(
+        company=OuterRef('pk'),
+        status__isnull=False
+    ).order_by().values('company').annotate(
+        max_order=Max('status__order')
+    ).values('max_order')
+
+    companies = companies_qs.annotate(
+        passed_max_order=Subquery(max_order_subquery, output_field=IntegerField()),
+        curr_order=Coalesce('status__order', Value(0))
+    ).annotate(
+        max_reached=Greatest('curr_order', Coalesce('passed_max_order', Value(0)))
+    )
+
+    companies = list(companies)
+    now = timezone.now()
+
+    for c in companies:
+        if c.curr_order == 0:
+            c.is_overdue = False
+        else:
+            last_record = CompanyStatusHistory.objects.filter(
+                company=c,
+                status__order=c.max_reached
+            ).order_by('-changed_at').first()
+            if not last_record or not c.status or c.status.duration_days == 0:
+                c.is_overdue = False
+            else:
+                workdays_elapsed = count_workdays(last_record.changed_at, now)
+                c.is_overdue = workdays_elapsed > c.status.duration_days
+
+    if q:
+        companies = [c for c in companies if q.lower() in c.name.lower()]
+    if overdue_filter:
+        companies = [c for c in companies if c.is_overdue]
+
+    return render(request, 'main/companies_table.html', {
+        'statuses':       statuses,
+        'companies':      companies,
+        'q':              q,
+        'overdue_filter': overdue_filter,
+    })
+
+
+@login_required
+def attach_docs(request, company_id, status_id):
+    """
+    Загрузка и просмотр PDF-файлов для Company + Status.
+    Поддерживает множественный выбор.
+    """
+    # проверяем права
+    if request.user.is_staff:
+        company = get_object_or_404(Company, pk=company_id)
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        company = get_object_or_404(Company, pk=company_id, region__in=user_regions)
+
+    status = get_object_or_404(Status, pk=status_id)
+
+    # уже загруженные документы
+    docs = CompanyStatusDocument.objects.filter(
+        company=company,
+        status=status
+    ).order_by('-uploaded_at')
+
+    if request.method == 'POST':
+        form = CompanyStatusDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Получаем список загруженных файлов из поля name="files"
+            files = request.FILES.getlist('files')
+            created_count = 0
+
+            for f in files:
+                CompanyStatusDocument.objects.create(
+                    company=company,
+                    status=status,
+                    file=f
+                )
+                created_count += 1
+
+            messages.success(request, f"Успешно загружено {created_count} файл(ов).")
+            return redirect('main:attach_docs', company_id=company.pk, status_id=status.pk)
+    else:
+        form = CompanyStatusDocumentForm()
+
+    return render(request, 'main/attach_docs.html', {
+        'company': company,
+        'status':  status,
+        'docs':    docs,
+        'form':    form,
+    })
+
+
+@login_required
+def delete_doc(request, company_id, status_id, doc_id):
+    if request.user.is_staff:
+        company = get_object_or_404(Company, pk=company_id)
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        company = get_object_or_404(Company, pk=company_id, region__in=user_regions)
+
+    status = get_object_or_404(Status, pk=status_id)
+    doc = get_object_or_404(
+        CompanyStatusDocument,
+        pk=doc_id,
+        company=company,
+        status=status
+    )
+
+    if request.method == 'POST':
+        doc.delete()
+        messages.success(request, "Файл успешно удалён.")
+        return redirect('main:attach_docs', company_id=company.pk, status_id=status.pk)
+
+    return redirect('main:attach_docs', company_id=company.pk, status_id=status.pk)

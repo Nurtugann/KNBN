@@ -1,0 +1,101 @@
+{# templates/main/profile.html #}
+{% extends 'main/base.html' %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:800px;">
+  <h1 class="mb-4">Личный кабинет</h1>
+
+  <div class="row">
+    <!-- Левая колонка: информация о пользователе -->
+    <div class="col-md-6">
+      <h3>Мои данные</h3>
+      <ul class="list-group mb-4">
+        <li class="list-group-item">
+          <strong>Имя:</strong> {{ user.get_full_name|default:user.username }}
+        </li>
+        <li class="list-group-item">
+          <strong>E-mail:</strong> {{ user.email }}
+        </li>
+        <li class="list-group-item">
+          <strong>Регионы пользователя:</strong>
+          {% if user.profile.regions.exists %}
+            {% for reg in user.profile.regions.all %}
+              {{ reg.get_code_display }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          {% else %}
+            <span class="text-muted">Не указаны</span>
+          {% endif %}
+        </li>
+      </ul>
+
+      {# Статистика по статусам (по желанию можно убрать или оставить) #}
+      <h5>Компании по статусам</h5>
+      <ul class="list-group mb-4">
+        {% for st in by_status %}
+          <li class="list-group-item d-flex justify-content-between">
+            {{ st.status__name|default:"Без статуса" }}
+            <span class="badge bg-secondary">{{ st.count }}</span>
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Нет компаний в системе</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Правая колонка: краткая статистика -->
+    <div class="col-md-6">
+      <h3>Общая статистика</h3>
+      <ul class="list-group mb-4">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          Всего компаний
+          <span class="badge bg-primary">{{ total }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          Просроченные
+          <span class="badge bg-danger">{{ overdue }}</span>
+        </li>
+      </ul>
+
+      {# Список компаний, близких к просрочке (≤ 1 рабочего дня) #}
+      {% if almost_overdue_list %}
+        <div class="mb-4">
+          <h5 class="text-warning">Близки к просрочке (≤ 1 раб. дн.)</h5>
+          <ul class="list-group">
+            {% for c in almost_overdue_list %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'main:company_detail' c.pk %}">
+                  {{ c.name }}
+                </a>
+                <small class="text-warning">
+                  осталось {{ c.days_left }} {% if c.days_left == 1 %}раб.дн.{% else %}раб.дн.{% endif %}
+                </small>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      {# Список просроченных компаний #}
+      {% if overdue_list %}
+        <div class="mb-4">
+          <h5 class="text-danger">Просроченные компании</h5>
+          <ul class="list-group">
+            {% for c in overdue_list %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'main:company_detail' c.pk %}">
+                  {{ c.name }}
+                </a>
+                <small class="text-danger">
+                  просрочено {{ c.days_in_status|add:"-c.status.duration_days" }} раб.дн.
+                </small>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
