@@ -1,31 +1,27 @@
 import os
 from pathlib import Path
-import dj_database_url
+
+import environ
 
 # 1) Базовый путь проекта
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2) Секретный ключ и режим отладки
-SECRET_KEY = os.getenv(
-    'DJANGO_SECRET_KEY',
-    'dev-secret-key-please-replace-in-production'
+# 2) Инициализируем django-environ и читаем .env (локально)
+env = environ.Env(
+    DEBUG=(bool, False)
 )
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+# Если на Render, .env не обязателен — переменные берутся из среды
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# 3) ALLOWED_HOSTS и CSRF_TRUSTED_ORIGINS
-raw_allowed = os.getenv('ALLOWED_HOSTS', '')
-if raw_allowed:
-    ALLOWED_HOSTS = [h.strip() for h in raw_allowed.split(',') if h.strip()]
-else:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# 3) Секретный ключ и режим отладки
+SECRET_KEY = env('SECRET_KEY', default='dev-secret-key-please-replace-in-production')
+DEBUG      = env('DEBUG')
 
-raw_csrf = os.getenv('CSRF_TRUSTED_ORIGINS', '')
-if raw_csrf:
-    CSRF_TRUSTED_ORIGINS = [u.strip() for u in raw_csrf.split(',') if u.strip()]
-else:
-    CSRF_TRUSTED_ORIGINS = []
+# 4) ALLOWED_HOSTS и CSRF_TRUSTED_ORIGINS
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
 
-# 4) Приложения и middleware
+# 5) Приложения и middleware
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,7 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # для отдачи статики
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # отдача статики
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -47,10 +43,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# 5) Корневой URL-конфиг
+# 6) URL-конфиг и шаблоны
 ROOT_URLCONF = 'kanbanmanager.urls'
 
-# 6) Настройка шаблонов
 TEMPLATES = [
     {
         'BACKEND':  'django.template.backends.django.DjangoTemplates',
@@ -66,19 +61,14 @@ TEMPLATES = [
     },
 ]
 
-# 7) WSGI
 WSGI_APPLICATION = 'kanbanmanager.wsgi.application'
 
-# 8) База данных из окружения через DATABASE_URL
+# 7) База данных из переменных окружения
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': env.db(),  # прочитает DATABASE_URL
 }
 
-# 9) Валидация паролей
+# 8) Валидация паролей
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -86,24 +76,24 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# 10) Локализация
+# 9) Локализация
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE     = 'Asia/Almaty'
 USE_I18N      = True
 USE_TZ        = True
 
-# 11) Статические файлы
-STATIC_URL        = '/static/'
-STATICFILES_DIRS  = [BASE_DIR / 'main' / 'static']
-STATIC_ROOT       = BASE_DIR / 'staticfiles'
+# 10) Статические файлы
+STATIC_URL       = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'main' / 'static']
+STATIC_ROOT      = BASE_DIR / 'staticfiles'
 
-# 12) Медиа-файлы
+# 11) Медиа-файлы
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# 13) Авторизация/перенаправления
+# 12) Авторизация/перенаправления
 LOGIN_REDIRECT_URL = 'main:index'
 LOGIN_URL          = 'login'
 
-# 14) Поле по умолчанию для моделей
+# 13) Поле по умолчанию для моделей
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
