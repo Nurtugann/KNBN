@@ -4,3 +4,4 @@ django-filter
 whitenoise
 psycopg2-binary
 psycopg2
+gunicorn
