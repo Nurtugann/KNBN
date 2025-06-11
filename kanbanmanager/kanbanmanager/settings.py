@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import dj_database_url
 
 # 1) Базовый путь проекта
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +38,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Для отдачи статики
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # для отдачи статики
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -52,10 +53,10 @@ ROOT_URLCONF = 'kanbanmanager.urls'
 # 6) Настройка шаблонов
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # общий каталог templates/
+        'BACKEND':  'django.template.backends.django.DjangoTemplates',
+        'DIRS':     [BASE_DIR / 'templates'],
         'APP_DIRS': True,
-        'OPTIONS': {
+        'OPTIONS':  {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -68,18 +69,14 @@ TEMPLATES = [
 # 7) WSGI
 WSGI_APPLICATION = 'kanbanmanager.wsgi.application'
 
-# 8) База данных (SQLite по умолчанию)
+# 8) База данных из окружения через DATABASE_URL
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME':     'mydb',
-        'USER':     'myuser',
-        'PASSWORD': 'mypassword',
-        'HOST':     'localhost',
-        'PORT':     '5432',
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
-
 
 # 9) Валидация паролей
 AUTH_PASSWORD_VALIDATORS = [
@@ -91,27 +88,22 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # 10) Локализация
 LANGUAGE_CODE = 'ru-ru'
-TIME_ZONE = 'Asia/Almaty'
-USE_I18N = True
-USE_TZ = True
+TIME_ZONE     = 'Asia/Almaty'
+USE_I18N      = True
+USE_TZ        = True
 
 # 11) Статические файлы
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'main' / 'static',
-]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# WhiteNoise позволяет отдавать собранную статику
-# MIDDLEWARE уже содержит 'whitenoise.middleware.WhiteNoiseMiddleware'
+STATIC_URL        = '/static/'
+STATICFILES_DIRS  = [BASE_DIR / 'main' / 'static']
+STATIC_ROOT       = BASE_DIR / 'staticfiles'
 
 # 12) Медиа-файлы
-MEDIA_URL = '/media/'
+MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # 13) Авторизация/перенаправления
 LOGIN_REDIRECT_URL = 'main:index'
-LOGIN_URL = 'login'
+LOGIN_URL          = 'login'
 
 # 14) Поле по умолчанию для моделей
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
