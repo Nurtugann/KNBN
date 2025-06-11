@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-import environ
+import environ # type: ignore
 
 # 1) Базовый путь проекта
 BASE_DIR = Path(__file__).resolve().parent.parent

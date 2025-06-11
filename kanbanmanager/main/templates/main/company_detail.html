@@ -9,8 +9,12 @@
     .company-header.card {
       background: #fff;
       border-radius: .75rem;
-      padding: 1rem;
-      margin-bottom: 1.5rem;
+      /* растягиваем ширину на 2rem больше контейнера */
+      width: calc(100% + 2rem);
+      /* сдвигаем на 1rem влево и вправо, чтобы вернуть в сетку */
+      margin: 0 -1rem 1.5rem;
+      /* немного больше внутренних отступов по бокам */
+      padding: 1rem 1.5rem;
       box-shadow: 0 .125rem .25rem rgba(0,0,0,0.075);
     }
     .company-header .company-name {
