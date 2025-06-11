@@ -3,8 +3,8 @@
   "model": "auth.user",
   "pk": 1,
   "fields": {
-    "password": "pbkdf2_sha256$870000$62zfNL2eThGyUvu9hF1ae2$1XIqqV0mdzA5AS6fLgBU8fua3AiXeC3oyslljJQHXpc=",
-    "last_login": "2025-06-10T16:32:23.513Z",
+    "password": "pbkdf2_sha256$870000$DjPoEN7HOTruDIKGVsZL1V$O/iujrYkVFAHSREphGvUx7TTRxo2JusA7kIdqmWyVM8=",
+    "last_login": "2025-06-11T12:09:57.470Z",
     "is_superuser": true,
     "username": "admin",
     "first_name": "",
@@ -55,22 +55,6 @@
 },
 {
   "model": "sessions.session",
-  "pk": "41c3eg9yzgosiguip1tju3g8q46q6uxh",
-  "fields": {
-    "session_data": ".eJxVjEEOwiAQRe_C2hBKp0Nx6b5nIDAMUjWQlHZlvLtt0oVu33v_v4Xz25rd1nhxcxRX0YnLLwuenlwOER--3KukWtZlDvJI5GmbnGrk1-1s_w6yb3lfe4WkfYQB0IbewJh0CorYaBwh2qQC226HSAqNjcZwQNbUQxpAm6TE5wvggDe2:1uP08H:-rBwY2Sb0pbYvpYrbt-GScBGbtPbK7IsvgtQP4KYh48",
-    "expire_date": "2025-06-24T14:39:21.335Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "483pe6r1reay070ezyxv2wrn5w0urq2y",
-  "fields": {
-    "session_data": ".eJxVjEEOwiAQRe_C2hBKp0Nx6b5nIDAMUjWQlHZlvLtt0oVu33v_v4Xz25rd1nhxcxRX0YnLLwuenlwOER--3KukWtZlDvJI5GmbnGrk1-1s_w6yb3lfe4WkfYQB0IbewJh0CorYaBwh2qQC226HSAqNjcZwQNbUQxpAm6TE5wvggDe2:1uN8to:8uNuNj4cOdqvAVQpK7XAHn-0CqhN7YAlsjvGFUmYIQk",
-    "expire_date": "2025-06-19T11:36:44.890Z"
-  }
-},
-{
-  "model": "sessions.session",
   "pk": "7c03h06aadknoqnyej0xpyj7lwhdg4e8",
   "fields": {
     "session_data": "e30:1uKWJl:aBZ69s-eaA3Im4m9B17FlI_YLxkKRLRD-8m5EZ7PWOA",
@@ -95,6 +79,14 @@
 },
 {
   "model": "sessions.session",
+  "pk": "n6ry1e39ezyarr68zoxk97kkrcshqan4",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQAP-FsyEuT_Hovd_QsOwiVQNJaU_GfzckPeh1ZjJvMcd9K_PeeZ0XElcB4vTLMKYn1yHoEeu9ydTqti4oRyIP2-XUiF-3o_0blNjL2LJLKWSXFGoT0HngTGTQW0XAmDVYypo8KdCOfUAfweYUCC7WkDuLzxcDXDhs:1uOZ4b:IsRN8SoSRnvr4YKVUGgyrDna4MwX5-K99m-6QTyM5uM",
+    "expire_date": "2025-06-23T09:45:45.168Z"
+  }
+},
+{
+  "model": "sessions.session",
   "pk": "ongila4p5bprkg2h9do27eetkmv7dodo",
   "fields": {
     "session_data": "e30:1uKWKL:gEC9qR1Z8ERBGf0tWq8AX5SUbFC3s2hBXYhUjPhjp6o",
@@ -103,10 +95,10 @@
 },
 {
   "model": "sessions.session",
-  "pk": "wxcn6k363qykaay38utfv3qmtnkyg61u",
+  "pk": "wibh353rs372n3py8ioc00wqxc91ruhp",
   "fields": {
-    "session_data": ".eJxVjEEOwiAQRe_C2hBKp0Nx6b5nIDAMUjWQlHZlvLtt0oVu33v_v4Xz25rd1nhxcxRX0YnLLwuenlwOER--3KukWtZlDvJI5GmbnGrk1-1s_w6yb3lfe4WkfYQB0IbewJh0CorYaBwh2qQC226HSAqNjcZwQNbUQxpAm6TE5wvggDe2:1uP1tf:jsM3L-PEJpDzKyBaeWy9Ko5V80yB6sFXwagDD39Pid8",
-    "expire_date": "2025-06-24T16:32:23.519Z"
+    "session_data": ".eJxVjEEOwiAQRe_C2hAGygRcuvcMZBhGqRqalHZlvLtt0oVu_3vvv1Widalp7TKnsaizAnX63TLxU9oOyoPafdI8tWUes94VfdCur1OR1-Vw_w4q9brVjsBJxMyAzBRtLFi8AyuC6DAYb2Qw1vos6AAMCli6DRB404IVoz5fzdc2_A:1uPKHF:B08c2xAl7HjtYwocXm0YTkpap8IOLaoRhawV9ZbQGX8",
+    "expire_date": "2025-06-25T12:09:57.477Z"
   }
 },
 {
@@ -455,247 +447,2082 @@
 },
 {
   "model": "main.company",
-  "pk": 3,
+  "pk": 171,
   "fields": {
-    "name": "Первая компания",
-    "bin_number": null,
-    "manager_name": "Андрей",
+    "name": "Аида СХП ТОО",
+    "bin_number": "41240012179.0",
+    "manager_name": null,
     "debt_amount": null,
-    "status": 5,
-    "position": 1,
-    "region": "KST"
+    "status": null,
+    "position": 0,
+    "region": "SKO"
   }
 },
 {
   "model": "main.company",
-  "pk": 4,
+  "pk": 172,
   "fields": {
-    "name": "Вторая Тоошка",
-    "bin_number": null,
+    "name": "ALTAIR TRAID KZ ТОО",
+    "bin_number": "240340017707.0",
     "manager_name": null,
     "debt_amount": null,
-    "status": 4,
-    "position": 1,
-    "region": "AKM"
+    "status": null,
+    "position": 0,
+    "region": "SKO"
   }
 },
 {
   "model": "main.company",
-  "pk": 6,
+  "pk": 173,
   "fields": {
-    "name": "Четвертая",
-    "bin_number": null,
+    "name": "B.BirlikAgro ТОО",
+    "bin_number": "211140012904.0",
     "manager_name": null,
     "debt_amount": null,
-    "status": 6,
-    "position": 3,
+    "status": null,
+    "position": 0,
     "region": "VKO"
   }
 },
 {
   "model": "main.company",
-  "pk": 7,
+  "pk": 174,
   "fields": {
-    "name": "Пятая",
-    "bin_number": null,
+    "name": "DVV AGRO ТОО",
+    "bin_number": "211140023474.0",
     "manager_name": null,
     "debt_amount": null,
-    "status": 14,
-    "position": 4,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 175,
+  "fields": {
+    "name": "JysanAgroKazakhstan ТОО",
+    "bin_number": "200840027349.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 176,
+  "fields": {
+    "name": "KAZAKHSTAN GREEN RESOURCE ТОО",
+    "bin_number": "150440031846.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 177,
+  "fields": {
+    "name": "NAMYS - 2017 ТОО",
+    "bin_number": "170840013152.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 178,
+  "fields": {
+    "name": "SanarAgro ТОО",
+    "bin_number": "50440004302.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 179,
+  "fields": {
+    "name": "Saryarqa Agro ТОО",
+    "bin_number": "90740003273.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 180,
+  "fields": {
+    "name": "SHAL AKYN AGRO ТОО",
+    "bin_number": "181040024554.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 181,
+  "fields": {
+    "name": "Абай КХ",
+    "bin_number": "980106350124.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 182,
+  "fields": {
+    "name": "АБДРАХМАНОВ ФХ",
+    "bin_number": "70264033733.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 183,
+  "fields": {
+    "name": "Агайындар КХ",
+    "bin_number": "591209301137.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "VKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 184,
+  "fields": {
+    "name": "Агро Вектор КХ",
+    "bin_number": "200964029964.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 185,
+  "fields": {
+    "name": "Агро Пак ТОО",
+    "bin_number": "160440033587.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 186,
+  "fields": {
+    "name": "АГРО СФЕРА KZ ТОО",
+    "bin_number": "200940032051.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 187,
+  "fields": {
+    "name": "Агро-ПАРАСАТ ТОО",
+    "bin_number": "160240000682.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 188,
+  "fields": {
+    "name": "АГРО-ФЕРМЕР ТОО",
+    "bin_number": "151240013229.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 189,
+  "fields": {
+    "name": "Агрофирма БайЖер ТОО",
+    "bin_number": "170540027479.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 190,
+  "fields": {
+    "name": "Агрофирма Халық Жері ТОО",
+    "bin_number": "170540027518.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 191,
+  "fields": {
+    "name": "Адай КХ",
+    "bin_number": "620921350240.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 192,
+  "fields": {
+    "name": "АЗАМАТ КХ",
+    "bin_number": "980429350428.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 193,
+  "fields": {
+    "name": "Азмаган ТОО",
+    "bin_number": "160240010233.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 194,
+  "fields": {
+    "name": "Ай-Ер КХ",
+    "bin_number": "940513350506.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 195,
+  "fields": {
+    "name": "Айбек КХ",
+    "bin_number": "650110301090.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 196,
+  "fields": {
+    "name": "Айгерим КХ",
+    "bin_number": "770407301099.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 197,
+  "fields": {
+    "name": "АК-ЖОЛ КХ",
+    "bin_number": "600901402630.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 198,
+  "fields": {
+    "name": "Акжар Нан ФХ",
+    "bin_number": "770926301408.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 199,
+  "fields": {
+    "name": "Алга Жер ФХ",
+    "bin_number": "70664027839.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 200,
+  "fields": {
+    "name": "Алисарай ТОО",
+    "bin_number": "210540002780.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 201,
+  "fields": {
+    "name": "АЛМАЗ КХ",
+    "bin_number": "710115350013.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 202,
+  "fields": {
+    "name": "Алпыспаев Е.М. КХ",
+    "bin_number": "781024301489.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 203,
+  "fields": {
+    "name": "Аман-Агро КХ",
+    "bin_number": "940814351392.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 204,
+  "fields": {
+    "name": "АМАНЖОЛ-К КХ",
+    "bin_number": "600101353164.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 205,
+  "fields": {
+    "name": "Амина КХ",
+    "bin_number": "200364020878.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "PAV"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 206,
+  "fields": {
+    "name": "Арай-1 ТОО",
+    "bin_number": "980340001566.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 207,
+  "fields": {
+    "name": "АС КХ",
+    "bin_number": "831118302023.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "VKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 208,
+  "fields": {
+    "name": "Астык-Лидер 2020 ТОО",
+    "bin_number": "200840005685.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 209,
+  "fields": {
+    "name": "Ахметкалиев КХ",
+    "bin_number": "661203350089.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 210,
+  "fields": {
+    "name": "АЯЖАН ФХ",
+    "bin_number": "100764009585.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 211,
+  "fields": {
+    "name": "Әлжан КХ",
+    "bin_number": "60264031107.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 212,
+  "fields": {
+    "name": "БаАс КХ",
+    "bin_number": "470620301273.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 213,
+  "fields": {
+    "name": "БАБАСАН КХ",
+    "bin_number": "590217301089.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 214,
+  "fields": {
+    "name": "БАЛДИКОВ У.К. КХ",
+    "bin_number": "530102301954.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 215,
+  "fields": {
+    "name": "Батракова В.И. КХ",
+    "bin_number": "570101316776.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "VKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 216,
+  "fields": {
+    "name": "БІРЛІК КХ",
+    "bin_number": "670930301499.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 217,
+  "fields": {
+    "name": "Бірлік-С ТОО",
+    "bin_number": "150640026381.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 218,
+  "fields": {
+    "name": "БУХАР ЖЫРАУ КХ",
+    "bin_number": "680501350199.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 219,
+  "fields": {
+    "name": "ВЕГА-СПЕКТР ТОО",
+    "bin_number": "51064022508.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 220,
+  "fields": {
+    "name": "Вилма КХ",
+    "bin_number": "911218351469.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 221,
+  "fields": {
+    "name": "Восток ФХ",
+    "bin_number": "210764011571.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 222,
+  "fields": {
+    "name": "ГЕЯ КХ",
+    "bin_number": "630919401081.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 223,
+  "fields": {
+    "name": "Гиззат КХ",
+    "bin_number": "570819400680.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 224,
+  "fields": {
+    "name": "Горбань И.Н. КХ",
+    "bin_number": "690102302290.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 225,
+  "fields": {
+    "name": "Гребенюк В.А. КХ",
+    "bin_number": "730327301751.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 226,
+  "fields": {
+    "name": "Данкой ИП",
+    "bin_number": "730721400375.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 227,
+  "fields": {
+    "name": "Дарын-Саулет КХ",
+    "bin_number": "640223302051.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 228,
+  "fields": {
+    "name": "Дастан КХ",
+    "bin_number": "721109450038.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 229,
+  "fields": {
+    "name": "ДЖАГОПАРОВ КХ",
+    "bin_number": "690601301007.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "PAV"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 230,
+  "fields": {
+    "name": "Диана КХ",
+    "bin_number": "630502401593.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 231,
+  "fields": {
+    "name": "Диас КФХ",
+    "bin_number": "841124350236.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 232,
+  "fields": {
+    "name": "Динали Агро ТОО",
+    "bin_number": "210440032759.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 233,
+  "fields": {
+    "name": "ДИЯР КХ",
+    "bin_number": "930406350730.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 234,
+  "fields": {
+    "name": "Достык КХ",
+    "bin_number": "821018350672.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 235,
+  "fields": {
+    "name": "Дудов С.И. ФХ",
+    "bin_number": "550128300327.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 236,
+  "fields": {
+    "name": "Ембек КХ",
+    "bin_number": "820504450717.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 237,
+  "fields": {
+    "name": "Енбек Агро-2020 ТОО",
+    "bin_number": "200240014048.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 238,
+  "fields": {
+    "name": "ЕРЖАН КРЕСТЬЯНСКОЕ ХОЗЯЙСТВО",
+    "bin_number": "591014450042.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 239,
+  "fields": {
+    "name": "Ермек-Агро ТОО",
+    "bin_number": "41140012829.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 240,
+  "fields": {
+    "name": "Ескеев Е КХ",
+    "bin_number": "600805401839.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 241,
+  "fields": {
+    "name": "Жакупов ФХ",
+    "bin_number": "840324350429.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 242,
+  "fields": {
+    "name": "Жан КХ",
+    "bin_number": "510418300851.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 243,
+  "fields": {
+    "name": "Жанажол-Агро КХ",
+    "bin_number": "811225350517.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 244,
+  "fields": {
+    "name": "Жигер ФХ",
+    "bin_number": "880924350408.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 245,
+  "fields": {
+    "name": "Жол-Аман КХ",
+    "bin_number": "800531301012.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 246,
+  "fields": {
+    "name": "Жученко Сергей Васильевич КХ",
+    "bin_number": "801017300270.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 247,
+  "fields": {
+    "name": "Зайнолла КХ",
+    "bin_number": "760603402048.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 248,
+  "fields": {
+    "name": "Заря КХ",
+    "bin_number": "510102301306.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 249,
+  "fields": {
+    "name": "Зурә ФХ",
+    "bin_number": "170664016547.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 250,
+  "fields": {
+    "name": "Ибраим КХ",
+    "bin_number": "691222350206.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 251,
+  "fields": {
+    "name": "Иванько С.В. КХ",
+    "bin_number": "690217300399.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 252,
+  "fields": {
+    "name": "Ильяс 2030 ТОО",
+    "bin_number": "41240012030.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 253,
+  "fields": {
+    "name": "ИМАНТАУ ЗЕМЛЯ И ПТИЦА ТОО",
+    "bin_number": "40940004213.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 254,
+  "fields": {
+    "name": "Имран КХ",
+    "bin_number": "860122350335.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 255,
+  "fields": {
+    "name": "ИП КХ Ануар",
+    "bin_number": "780420303138.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 256,
+  "fields": {
+    "name": "ИСАГАЛИ ТОО",
+    "bin_number": "31240003623.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 257,
+  "fields": {
+    "name": "ИСКАКОВ КХ",
+    "bin_number": "880513350999.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 258,
+  "fields": {
+    "name": "Казмикс ТОО",
+    "bin_number": "180740015612.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 259,
+  "fields": {
+    "name": "КазПв-Агро ТОО",
+    "bin_number": "190240024794.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "PAV"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 260,
+  "fields": {
+    "name": "Кайса КХ",
+    "bin_number": "661217301027.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 261,
+  "fields": {
+    "name": "Калиев С.Ж КХ",
+    "bin_number": "611101350640.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 262,
+  "fields": {
+    "name": "Калыма ТОО",
+    "bin_number": "211140030784.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 263,
+  "fields": {
+    "name": "Карлыгаш КХ",
+    "bin_number": "510601400139.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 264,
+  "fields": {
+    "name": "Кермек КХ",
+    "bin_number": "600508450446.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 265,
+  "fields": {
+    "name": "Кобжанов КХ",
+    "bin_number": "750617301474.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 266,
+  "fields": {
+    "name": "Қарағай Агро ТОО",
+    "bin_number": "90440004538.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 267,
+  "fields": {
+    "name": "Қызыл-Уюм ТОО",
+    "bin_number": "40240015993.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 268,
+  "fields": {
+    "name": "Луговое КХ",
+    "bin_number": "620625350053.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 269,
+  "fields": {
+    "name": "Луцкий В.А. КХ",
+    "bin_number": "700503300358.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 270,
+  "fields": {
+    "name": "Мак-С ТОО",
+    "bin_number": "50240009990.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 271,
+  "fields": {
+    "name": "Машлякевич Крестьянское Хозяйство",
+    "bin_number": "611102350289.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 272,
+  "fields": {
+    "name": "Мечта 2019 ТОО",
+    "bin_number": "190140033889.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 273,
+  "fields": {
+    "name": "Мирас КХ",
+    "bin_number": "970616350809.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 274,
+  "fields": {
+    "name": "Музыченко Е.Н. КХ",
+    "bin_number": "760401350073.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 275,
+  "fields": {
+    "name": "Мулдабеков Орал Габдулович КХ",
+    "bin_number": "730923301226.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 276,
+  "fields": {
+    "name": "Муллаянов ТОО",
+    "bin_number": "210240028496.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 277,
+  "fields": {
+    "name": "Мусин С. Б.  КХ",
+    "bin_number": "581003350639.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 278,
+  "fields": {
+    "name": "Мухатаев ТОО",
+    "bin_number": "201040030124.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 279,
+  "fields": {
+    "name": "Нурасыл КХ",
+    "bin_number": "950216351155.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 280,
+  "fields": {
+    "name": "Нурлан КХ",
+    "bin_number": "830901350423.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 281,
+  "fields": {
+    "name": "Обама ТОО",
+    "bin_number": "20240008372.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 282,
+  "fields": {
+    "name": "Олжас и К КХ",
+    "bin_number": "800115300786.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 283,
+  "fields": {
+    "name": "Отан КХ",
+    "bin_number": "680101302352.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 284,
+  "fields": {
+    "name": "ПИЧКУЛЯКОВ А.В. КХ",
+    "bin_number": "720522301086.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 285,
+  "fields": {
+    "name": "Плохотенко Е.Г. КХ",
+    "bin_number": "561105401122.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 286,
+  "fields": {
+    "name": "Попова П.И. КХ",
+    "bin_number": "620402350358.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 287,
+  "fields": {
+    "name": "Поспелов Д.Г. КХ",
+    "bin_number": "601112350251.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 288,
+  "fields": {
+    "name": "Пфафенгут А.Р. КХ",
+    "bin_number": "890519350814.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 289,
+  "fields": {
+    "name": "Раковец Е,А, КХ",
+    "bin_number": "700311350380.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 290,
+  "fields": {
+    "name": "РАХАТ КХ",
+    "bin_number": "711123301127.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 291,
+  "fields": {
+    "name": "Ринат и К КХ",
+    "bin_number": "881129350314.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 292,
+  "fields": {
+    "name": "САБЫНДЫ КХ Бекежанов Болат Капанович",
+    "bin_number": "700523350303.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 293,
+  "fields": {
+    "name": "САД-НУР ТОО",
+    "bin_number": "41140005063.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 294,
+  "fields": {
+    "name": "Садаков А.А, КХ ИИН 960630351495",
+    "bin_number": "960630351495.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 295,
+  "fields": {
+    "name": "Самир ФХ",
+    "bin_number": "481207300294.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 296,
+  "fields": {
+    "name": "Саят КХ",
+    "bin_number": "630127350335.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 297,
+  "fields": {
+    "name": "Север Жасылжер ТОО",
+    "bin_number": "90540003701.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 298,
+  "fields": {
+    "name": "Сергевка ТОО",
+    "bin_number": "141140000965.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 299,
+  "fields": {
+    "name": "Симферопольское Агро 2020 ТОО",
+    "bin_number": "201040031370.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 300,
+  "fields": {
+    "name": "Сман и Аскарбек КХ",
+    "bin_number": "530115301251.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 301,
+  "fields": {
+    "name": "София КХ",
+    "bin_number": "621018402200.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 302,
+  "fields": {
+    "name": "Союз Алем-KZ ТОО",
+    "bin_number": "60940005261.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
     "region": "KAR"
   }
 },
 {
   "model": "main.company",
-  "pk": 8,
+  "pk": 303,
   "fields": {
-    "name": "Шестая",
-    "bin_number": null,
+    "name": "Тамирис Жер ТОО",
+    "bin_number": "171040037212.0",
     "manager_name": null,
     "debt_amount": null,
-    "status": 15,
-    "position": 5,
-    "region": "KST"
+    "status": null,
+    "position": 0,
+    "region": "AKM"
   }
 },
 {
   "model": "main.company",
-  "pk": 9,
+  "pk": 304,
   "fields": {
-    "name": "Седьмая",
-    "bin_number": null,
+    "name": "ТАН КХ",
+    "bin_number": "761109350316.0",
     "manager_name": null,
     "debt_amount": null,
-    "status": 3,
-    "position": 1,
-    "region": "KST"
-  }
-},
-{
-  "model": "main.company",
-  "pk": 10,
-  "fields": {
-    "name": "Третья Тоошка",
-    "bin_number": null,
-    "manager_name": null,
-    "debt_amount": null,
-    "status": 5,
-    "position": 2,
+    "status": null,
+    "position": 0,
     "region": "SKO"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 117,
+  "model": "main.company",
+  "pk": 305,
   "fields": {
-    "company": 3,
-    "status": 3,
-    "changed_at": "2025-06-05T09:24:05.569Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "ТАРБАГАТАЙ КХ",
+    "bin_number": "461002300672.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "VKO"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 119,
+  "model": "main.company",
+  "pk": 306,
   "fields": {
-    "company": 4,
-    "status": 1,
-    "changed_at": "2025-06-05T09:40:29.214Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "Татьяна и К Крестьянское Хозяйство",
+    "bin_number": "710212350186.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 120,
+  "model": "main.company",
+  "pk": 307,
   "fields": {
-    "company": 10,
-    "status": 5,
-    "changed_at": "2025-05-01T09:40:00Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "ТДС-Агро ТОО",
+    "bin_number": "121240005371.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 121,
+  "model": "main.company",
+  "pk": 308,
   "fields": {
-    "company": 6,
-    "status": 6,
-    "changed_at": "2025-06-05T09:40:53.479Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "Тем-КАР КХ",
+    "bin_number": "620819450282.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 122,
+  "model": "main.company",
+  "pk": 309,
   "fields": {
-    "company": 7,
-    "status": 14,
-    "changed_at": "2025-05-05T09:41:00Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "Терек-М ТОО",
+    "bin_number": "21240007694.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 123,
+  "model": "main.company",
+  "pk": 310,
   "fields": {
-    "company": 8,
-    "status": 15,
-    "changed_at": "2025-06-05T09:41:09.938Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "Тухватуллин Ф.Г. и К ФХ",
+    "bin_number": "50964022855.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "PAV"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 124,
+  "model": "main.company",
+  "pk": 311,
   "fields": {
-    "company": 9,
-    "status": 2,
-    "changed_at": "2025-06-05T09:41:19.272Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "Укен КХ",
+    "bin_number": "50264032301.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 125,
+  "model": "main.company",
+  "pk": 312,
   "fields": {
-    "company": 4,
-    "status": 6,
-    "changed_at": "2025-06-05T09:55:58.904Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "УРАЗБАЕВ КХ",
+    "bin_number": "660623301091.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "PAV"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 126,
+  "model": "main.company",
+  "pk": 313,
   "fields": {
-    "company": 4,
-    "status": 5,
-    "changed_at": "2025-06-05T09:56:08.101Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "Чайка КХ",
+    "bin_number": "40264029439.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 127,
+  "model": "main.company",
+  "pk": 314,
   "fields": {
-    "company": 4,
-    "status": 8,
-    "changed_at": "2025-06-05T10:04:17.194Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "ЧИСТЫЙ ЯР АГРО ТОО",
+    "bin_number": "41240001222.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "VKO"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 128,
+  "model": "main.company",
+  "pk": 315,
   "fields": {
-    "company": 4,
-    "status": 4,
-    "changed_at": "2025-06-05T10:04:34.619Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "ШАЙХАН-АГРО ТОО",
+    "bin_number": "210940021632.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
   }
 },
 {
-  "model": "main.companystatushistory",
-  "pk": 129,
+  "model": "main.company",
+  "pk": 316,
   "fields": {
-    "company": 9,
-    "status": 3,
-    "changed_at": "2025-06-05T12:06:06.487Z",
-    "is_paused": false,
-    "paused_at": null
+    "name": "Шериезданов С.Р. КХ",
+    "bin_number": "640508300877.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
   }
 },
 {
-  "model": "main.comment",
-  "pk": 1,
+  "model": "main.company",
+  "pk": 317,
   "fields": {
-    "company": 4,
-    "status": 6,
-    "author": 1,
-    "text": "Например привер",
-    "created_at": "2025-06-05T05:20:19.063Z"
+    "name": "ШИЛОВ АЛЕКСЕЙ АНАТОЛЬЕВИЧ ИП",
+    "bin_number": "820917351427.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
   }
 },
 {
-  "model": "main.comment",
-  "pk": 2,
+  "model": "main.company",
+  "pk": 318,
   "fields": {
-    "company": 4,
-    "status": 4,
-    "author": 1,
-    "text": "Какой пример коментарии тд тп траляля",
-    "created_at": "2025-06-05T05:24:35.737Z"
+    "name": "Шинкентаев О. КХ",
+    "bin_number": "661211350101.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 319,
+  "fields": {
+    "name": "ШОРТАНБАЙ 2020 ТОО",
+    "bin_number": "200240015254.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 320,
+  "fields": {
+    "name": "ШОРТАНБАЙ-2019 ТОО",
+    "bin_number": "190340012843.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 321,
+  "fields": {
+    "name": "Щербаков Вячеслав Александрович КХ",
+    "bin_number": "800112350111.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "KST"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 322,
+  "fields": {
+    "name": "Ырыс КХ",
+    "bin_number": "850126350781.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 323,
+  "fields": {
+    "name": "Ырыс Товарищество с ограниченной ответственностью",
+    "bin_number": "131240005066.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 324,
+  "fields": {
+    "name": "Kuan-Agro.kz ТОО",
+    "bin_number": "220440037444.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 325,
+  "fields": {
+    "name": "Глебов А.А. КХ",
+    "bin_number": "480616350053.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 326,
+  "fields": {
+    "name": "Данияр ФХ",
+    "bin_number": "520114301244.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 327,
+  "fields": {
+    "name": "Екпін-2002 ТОО",
+    "bin_number": "20140001916.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "SKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 328,
+  "fields": {
+    "name": "САМУР КХ",
+    "bin_number": "580309300742.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "VKO"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 329,
+  "fields": {
+    "name": "АФ Новомарковка-2010 ТОО",
+    "bin_number": "101040003641.0",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
+  }
+},
+{
+  "model": "main.company",
+  "pk": 330,
+  "fields": {
+    "name": "ГК Избасаров",
+    "bin_number": "nan",
+    "manager_name": null,
+    "debt_amount": null,
+    "status": null,
+    "position": 0,
+    "region": "AKM"
   }
 },
 {
