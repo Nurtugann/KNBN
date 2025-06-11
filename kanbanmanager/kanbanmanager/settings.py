@@ -6,12 +6,16 @@ import environ
 # 1) Базовый путь проекта
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2) Инициализируем django-environ и читаем .env (локально)
+# 2) Инициализируем django-environ
 env = environ.Env(
     DEBUG=(bool, False)
 )
-# Если на Render, .env не обязателен — переменные берутся из среды
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# Локально читаем .env, если файл существует
+env_file = BASE_DIR / '.env'
+if env_file.exists():
+    env.read_env(env_file)
+
 
 # 3) Секретный ключ и режим отладки
 SECRET_KEY = env('SECRET_KEY', default='dev-secret-key-please-replace-in-production')
