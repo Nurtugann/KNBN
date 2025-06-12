@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 2) Инициализируем django-environ
 env = environ.Env(
-    DEBUG=(bool, False)
+    DEBUG=(bool, True)
 )
 
 # Локально читаем .env, если файл существует
@@ -68,9 +68,19 @@ TEMPLATES = [
 WSGI_APPLICATION = 'kanbanmanager.wsgi.application'
 
 # 7) База данных из переменных окружения
-DATABASES = {
-    'default': env.db(),  # прочитает DATABASE_URL
-}
+# 7) База данных: сначала пробуем DATABASE_URL, иначе — SQLite
+if os.getenv('DATABASE_URL'):
+    DATABASES = {
+        'default': env.db(),  # прочитает DATABASE_URL
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
 
 # 8) Валидация паролей
 AUTH_PASSWORD_VALIDATORS = [

@@ -730,8 +730,10 @@ def signup(request):
 
 @login_required
 def companies_table(request):
-    q = request.GET.get('q', '').strip()
+    q              = request.GET.get('q', '').strip()
     overdue_filter = request.GET.get('overdue') == '1'
+    sort_field     = request.GET.get('sort') or ''         # 'name' или ''
+    sort_dir       = request.GET.get('dir') or 'asc'       # 'asc' или 'desc'
 
     statuses = Status.objects.all().order_by('order')
 
@@ -741,8 +743,8 @@ def companies_table(request):
         user_regions = request.user.profile.regions.values_list('code', flat=True)
         companies_qs = Company.objects.filter(region__in=user_regions)
 
+    # Аннотации, как было
     companies_qs = companies_qs.select_related('status')
-
     max_order_subquery = CompanyStatusHistory.objects.filter(
         company=OuterRef('pk'),
         status__isnull=False
@@ -758,9 +760,10 @@ def companies_table(request):
     )
 
     companies = list(companies)
-    now = timezone.now()
+    now       = timezone.now()
 
     for c in companies:
+        # пересчёт is_overdue
         if c.curr_order == 0:
             c.is_overdue = False
         else:
@@ -771,19 +774,32 @@ def companies_table(request):
             if not last_record or not c.status or c.status.duration_days == 0:
                 c.is_overdue = False
             else:
-                workdays_elapsed = count_workdays(last_record.changed_at, now)
-                c.is_overdue = workdays_elapsed > c.status.duration_days
+                c.is_overdue = count_workdays(last_record.changed_at, now) > c.status.duration_days
 
+        # флаг «на паузе» для текущего этапа
+        last_current = CompanyStatusHistory.objects.filter(
+            company=c, status=c.status
+        ).order_by('-changed_at').first()
+        c.is_paused = bool(last_current and last_current.is_paused)
+
+    # фильтры q и overdue
     if q:
         companies = [c for c in companies if q.lower() in c.name.lower()]
     if overdue_filter:
         companies = [c for c in companies if c.is_overdue]
+
+    # сортировка по имени
+    if sort_field == 'name':
+        reverse = (sort_dir == 'desc')
+        companies.sort(key=lambda c: c.name.lower(), reverse=reverse)
 
     return render(request, 'main/companies_table.html', {
         'statuses':       statuses,
         'companies':      companies,
         'q':              q,
         'overdue_filter': overdue_filter,
+        'sort_field':     sort_field,
+        'sort_dir':       sort_dir,
     })
 
 
