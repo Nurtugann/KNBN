@@ -182,9 +182,9 @@
             {% if st.id == company.status_id and hist %}
               <button
                 type="button"
-                class="btn btn-pause btn-sm {% if hist.is_paused %}btn-success{% else %}btn-warning{% endif %}"
-                data-toggle-url="{% url 'main:toggle_pause' company.pk hist.id %}">
-                {% if hist.is_paused %}↻ Возобновить{% else %}⏸ Пауза{% endif %}
+                class="btn btn-objection btn-sm {% if hist.is_paused %}btn-danger{% else %}btn-outline-danger{% endif %}"
+                data-toggle-url="{% url 'main:toggle_objection' company.pk hist.id %}">
+                {% if hist.is_paused %}Завершить обжалование{% else %}Обжалование{% endif %}
               </button>
             {% endif %}
           </div>
@@ -295,8 +295,8 @@
         });
       }
 
-      // Pause/resume AJAX
-      document.querySelectorAll('.btn-pause').forEach(btn => {
+      // вместо document.querySelectorAll('.btn-pause')
+      document.querySelectorAll('.btn-objection').forEach(btn => {
         btn.addEventListener('click', async e => {
           e.preventDefault();
           const url = btn.dataset.toggleUrl;
@@ -307,18 +307,38 @@
               headers: { 'X-CSRFToken': csrftoken, 'Accept': 'application/json' }
             });
             const data = await res.json();
-            if (data.result !== 'ok') throw '';
-            btn.textContent = data.is_paused ? '↻ Возобновить' : '⏸ Пауза';
-            btn.classList.toggle('btn-outline-success', data.is_paused);
-            btn.classList.toggle('btn-outline-warning', !data.is_paused);
-            const li = btn.closest('li.status-item');
-            li.classList.toggle('paused', data.is_paused);
-            li.classList.toggle('current', !data.is_paused);
-          } catch {
-            alert('Ошибка при переключении паузы');
+            if (data.result !== 'ok') throw new Error(data.message);
+
+            // Обновляем текст и стиль кнопки
+            if (data.is_paused) {
+              btn.textContent = 'Завершить обжалование';
+              btn.classList.replace('btn-outline-danger', 'btn-danger');
+            } else {
+              btn.textContent = 'Обжалование';
+              btn.classList.replace('btn-danger', 'btn-outline-danger');
+              // Сбрасываем старт и expected_end
+              const li = btn.closest('li.status-item');
+              li.classList.remove('paused');
+              li.classList.add('current');
+              // Перезаписываем дату старта
+              const dateEl = li.querySelector('.status-date');
+              dateEl.textContent = `Начало: ${data.new_changed_at} — 0 раб. д.`;
+              // Обновляем или вставляем expected_end
+              let ee = li.querySelector('.expected-end');
+              if (!ee && data.new_expected_end) {
+                ee = document.createElement('div');
+                ee.classList.add('expected-end');
+                li.querySelector('div').appendChild(ee);
+              }
+              if (ee) ee.textContent = `Ожидаемый конец: ${data.new_expected_end}`;
+            }
+          } catch(err) {
+            console.error(err);
+            alert('Ошибка при обжаловании: ' + err.message);
           }
         });
       });
+
 
       // Next step AJAX
       const nextForm = document.getElementById('nextStepForm');

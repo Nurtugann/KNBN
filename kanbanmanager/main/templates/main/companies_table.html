@@ -106,6 +106,33 @@
       background-color: transparent;
     }
 
+    /* ─── Дополнительная компактность ───────────────────────────────── */
+    .table-responsive table th,
+    .table-responsive table td {
+      padding: 0.25rem 0.5rem;  /* ещё чуть меньше */
+      font-size: 0.85rem;       /* чуть поменьше шрифт */
+    }
+
+    /* Уменьшаем ширину «липкой» колонки */
+    .sticky-col {
+      min-width: 160px !important;
+    }
+
+    /* Существенно уже заголовки-статусы */
+    th.status-header {
+      min-width: 120px !important;
+      max-width: 140px !important;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.85rem;
+    }
+    /* Обжалование (пауза) — тёмно-серый фон */
+    .table-responsive td.bg-secondary.no-pad a {
+      color: #fff !important;
+      font-weight: bold;
+    }
+
+
+
     /* ─── ПЛАВНОЕ ПОЯВЛЕНИЕ ЯЧЕЕК ПРИ ЗАГРУЗКЕ ───────────────────────── */
     @keyframes fadeInCell {
       from { opacity: 0; }
@@ -194,7 +221,7 @@
 
     <!-- Реальная прокручиваемая таблица: -->
     <div class="table-responsive">
-      <table class="table table-bordered align-middle mb-0" id="mainTable">
+      <table class="table table-sm table-bordered align-middle mb-0" id="mainTable">
         <thead class="table-light">
           <tr>
             <th class="sticky-col" scope="col">Компания</th>
@@ -205,61 +232,51 @@
             {% endfor %}
           </tr>
         </thead>
-        <tbody>
-          {% for company in companies %}
-            <tr>
-              <!-- «Липкий» столбец с основной инфой о компании -->
-              <td class="sticky-col" style="vertical-align: middle; background-color: #ffffff;">
-                <a href="{% url 'main:company_detail' company.pk %}">
-                  <strong>{{ company.name }}</strong>
-                </a>
-                <br>
-                <small class="text-muted">
-                  Сумма долга:
-                  {% if company.debt_amount %}{{ company.debt_amount }}{% else %}—{% endif %}
-                </small>
-                <br>
-                <small class="text-muted">
-                  Управляющий:
-                  {% if company.manager_name %}{{ company.manager_name }}{% else %}—{% endif %}
-                </small>
-              </td>
+          <tbody>
+            {% for company in companies %}
+              <tr>
+                <td class="sticky-col" style="vertical-align: middle; background-color: #fff;">
+                  <a href="{% url 'main:company_detail' company.pk %}">
+                    <strong>{{ company.name }}</strong>
+                  </a>
+                </td>
 
-              {% for status in statuses %}
-                {% if status.order < company.max_reached %}
-                  <!-- ПРОЙДЕННЫЙ ЭТАП: светло-зеленый фон -->
-                  <td class="text-center bg-success-light no-pad">
-                    <a href="{% url 'main:attach_docs' company.pk status.pk %}">✓</a>
-                  </td>
-                {% elif status.order == company.max_reached %}
-                  {% if company.is_overdue %}
-                    <!-- ПРОСРОЧЕННЫЙ ТЕКУЩИЙ: красный фон -->
-                    <td class="text-center bg-danger text-white no-pad">
-                      <a href="{% url 'main:attach_docs' company.pk status.pk %}">!</a>
+                {% for status in statuses %}
+                  {% if status.order < company.max_reached %}
+                    {# ПРОЙДЕННЫЙ ЭТАП #}
+                    <td class="text-center bg-success-light no-pad">
+                      <a href="{% url 'main:attach_docs' company.pk status.pk %}">✓</a>
                     </td>
+                  {% elif status.order == company.max_reached %}
+                    {# ТЕКУЩИЙ ЭТАП — проверяем сначала обжалование #}
+                    {% if company.is_paused %}
+                      <td class="text-center bg-secondary text-white no-pad">
+                        <a href="{% url 'main:attach_docs' company.pk status.pk %}">⏸</a>
+                      </td>
+                    {% elif company.is_overdue %}
+                      <td class="text-center bg-danger text-white no-pad">
+                        <a href="{% url 'main:attach_docs' company.pk status.pk %}">!</a>
+                      </td>
+                    {% else %}
+                      <td class="text-center bg-warning text-dark no-pad">
+                        <a href="{% url 'main:attach_docs' company.pk status.pk %}">→</a>
+                      </td>
+                    {% endif %}
                   {% else %}
-                    <!-- ТЕКУЩИЙ НЕ ПРОСРОЧЕННЫЙ: желтый фон -->
-                    <td class="text-center bg-warning text-dark no-pad">
-                      <a href="{% url 'main:attach_docs' company.pk status.pk %}">→</a>
+                    <td class="text-center no-pad">
+                      <a href="{% url 'main:attach_docs' company.pk status.pk %}"></a>
                     </td>
                   {% endif %}
-                {% else %}
-                  <!-- ЕЩЁ НЕ ДОСТИГНУТЫЙ -->
-                  <td class="text-center no-pad">
-                    <a href="{% url 'main:attach_docs' company.pk status.pk %}"></a>
-                  </td>
-                {% endif %}
-              {% endfor %}
-
-            </tr>
-          {% empty %}
-            <tr>
-              <td colspan="{{ statuses|length|add:'1' }}" class="text-center">
-                Нет компаний для отображения.
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
+                {% endfor %}
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="{{ statuses|length|add:'1' }}" class="text-center">
+                  Нет компаний для отображения.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
       </table>
     </div> <!-- /.table-responsive -->
   </div> <!-- /.table-scroll-wrapper -->

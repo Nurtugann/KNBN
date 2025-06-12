@@ -233,30 +233,47 @@ def add_status_comment(request, company_id, status_id):
     return redirect('main:company_detail', pk=company_id)
 
 
-@login_required
-@require_POST
-def toggle_pause(request, company_id, history_id):
-    """
-    Переключает паузу (is_paused) для конкретной записи CompanyStatusHistory.
-    """
-    hist = get_object_or_404(
-        CompanyStatusHistory,
-        pk=history_id,
-        company_id=company_id
-    )
-    if hist.is_paused:
-        hist.is_paused = False
-        hist.paused_at = None
-    else:
-        hist.is_paused = True
-        hist.paused_at = timezone.now()
-    hist.save(update_fields=['is_paused', 'paused_at'])
+# views.py
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.utils import timezone
 
-    return JsonResponse({
-        'result':    'ok',
-        'is_paused': hist.is_paused,
-        'paused_at': hist.paused_at.strftime("%Y-%m-%d %H:%M") if hist.paused_at else '',
-    })
+@require_POST
+def toggle_objection(request, company_id, hist_id):
+    try:
+        hist = get_object_or_404(CompanyStatusHistory, pk=hist_id, company_id=company_id)
+        now = timezone.now()
+
+        if not hist.is_paused:
+            # Начать обжалование
+            hist.is_paused = True
+            hist.paused_at = now
+        else:
+            # Завершить обжалование и сбросить начало
+            hist.is_paused = False
+            hist.paused_at = None
+            hist.changed_at = now
+
+        hist.save()
+
+        # Высчитаем новый expected_end (если нужно)
+        expected_end = None
+        if hist.status.duration_days:
+            expected_end = add_workdays(hist.changed_at, hist.status.duration_days)
+
+        return JsonResponse({
+            'result': 'ok',
+            'is_paused':     hist.is_paused,
+            'paused_at':     hist.paused_at.strftime('%Y-%m-%d %H:%M') if hist.paused_at else '',
+            'new_changed_at':    hist.changed_at.strftime('%Y-%m-%d %H:%M'),
+            'new_expected_end':  expected_end.strftime('%Y-%m-%d %H:%M') if expected_end else '',
+        })
+    except Exception as e:
+        # Отлавливаем любые исключения и возвращаем JSON
+        return JsonResponse({'result': 'error', 'message': str(e)}, status=500)
+
+
 
 
 @login_required

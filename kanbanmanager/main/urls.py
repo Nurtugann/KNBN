@@ -49,11 +49,13 @@ urlpatterns = [
     ),
 
     # AJAX-пауза для записи истории
+    # urls.py
     path(
-        'company/<int:company_id>/history/<int:history_id>/toggle_pause/',
-        views.toggle_pause,
-        name='toggle_pause'
+    'company/<int:company_id>/history/<int:hist_id>/toggle_objection/',
+    views.toggle_objection,
+    name='toggle_objection'
     ),
+
 
     # Страницы профиля и регистрации
     path('profile/', views.profile, name='profile'),

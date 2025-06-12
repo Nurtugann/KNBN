@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 2) Инициализируем django-environ
 env = environ.Env(
-    DEBUG=(bool, True)
+    DEBUG=(bool, False)
 )
 
 # Локально читаем .env, если файл существует
