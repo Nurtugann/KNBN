@@ -180,6 +180,12 @@
 <div class="container py-4">
   <h1>Табличный обзор: Компании и Статусы</h1>
 
+  <!-- Заголовок и кнопка "Добавить" -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">{{ title }}</h1>
+    <a href="{% url 'main:add_company' %}" class="btn btn-success">Добавить новую компанию</a>
+  </div>
+
   <!-- ─── Форма фильтров ──────────────────────────────────────────── -->
   <form method="get" class="row gx-2 gy-2 align-items-center mb-4">
     <!-- Поиск: занимает половину ширины на md+ и всю на xs -->
