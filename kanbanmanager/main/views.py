@@ -801,7 +801,11 @@ def companies_table(request):
 
     # фильтры q и overdue
     if q:
-        companies = [c for c in companies if q.lower() in c.name.lower()]
+        ql = q.lower()
+        companies = [
+            c for c in companies if ql in c.name.lower() or (c.bin_number and ql in str(c.bin_number).lower())
+        ]
+
     if overdue_filter:
         companies = [c for c in companies if c.is_overdue]
 

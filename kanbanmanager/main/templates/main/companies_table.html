@@ -181,33 +181,43 @@
   <h1>Табличный обзор: Компании и Статусы</h1>
 
   <!-- ─── Форма фильтров ──────────────────────────────────────────── -->
-  <form method="get" class="row gy-2 gx-2 align-items-center mb-4">
-    <div class="col-auto">
+  <form method="get" class="row gx-2 gy-2 align-items-center mb-4">
+    <!-- Поиск: занимает половину ширины на md+ и всю на xs -->
+    <div class="col-12 col-md-6">
       <input
         type="text"
         name="q"
         value="{{ q }}"
         class="form-control"
-        placeholder="Поиск по названию..."
+        placeholder="Поиск по названию или БИН..."
       >
     </div>
-    <div class="col-auto form-check">
-      <input
-        class="form-check-input"
-        type="checkbox"
-        name="overdue"
-        id="overdueCheck"
-        value="1"
-        {% if overdue_filter %}checked{% endif %}
-      >
-      <label class="form-check-label" for="overdueCheck">
-        Только просроченные
-      </label>
-    </div>
+
+    <!-- Чекбокс остаётся auto-width -->
     <div class="col-auto">
-      <button type="submit" class="btn btn-primary">Применить</button>
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="overdue"
+          id="overdueCheck"
+          value="1"
+          {% if overdue_filter %}checked{% endif %}
+        >
+        <label class="form-check-label" for="overdueCheck">
+          Только просроченные
+        </label>
+      </div>
+    </div>
+
+    <!-- Кнопка тоже auto-width -->
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary">
+        Применить
+      </button>
     </div>
   </form>
+
 
   <!--
     ─── ОБЕРТКА СО «ФЕЙКОВОЙ» ПОЛОСОЙ ПРОКРУТКИ ───────────────────────
