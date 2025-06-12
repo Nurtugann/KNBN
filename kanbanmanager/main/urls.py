@@ -12,7 +12,7 @@ urlpatterns = [
     path('companies_table/', views.companies_table, name='companies_table'),
 
     # Kanban-доска
-    path('board/', views.board, name='board'),
+    # path('board/', views.board, name='board'),
 
     # CRUD для компаний
     path('add/', views.add_company, name='add_company'),

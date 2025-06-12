@@ -529,28 +529,12 @@ def add_company(request):
     if request.method == 'POST':
         form = CompanyForm(request.POST, user=request.user)
         if form.is_valid():
-            c = form.save(commit=False)
-            if not request.user.is_staff:
-                regions = request.user.profile.regions.values_list('code', flat=True)
-                if regions:
-                    c.region = regions[0]
-            c.save()
-
-            # Если при создании сразу задан статус — создаём запись истории:
-            if c.status is not None:
-                CompanyStatusHistory.objects.create(
-                    company=c,
-                    status=c.status
-                )
-
+            form.save()
+            messages.success(request, "Компания добавлена")
             return redirect('main:index')
     else:
         form = CompanyForm(user=request.user)
-
-    return render(request, 'main/company_form.html', {
-        'title': 'Добавить компанию',
-        'form':  form,
-    })
+    return render(request, 'main/add_company.html', {'title': 'Добавить компанию', 'form': form})
 
 
 # main/views.py
