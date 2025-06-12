@@ -9,11 +9,8 @@
     .company-header.card {
       background: #fff;
       border-radius: .75rem;
-      /* растягиваем ширину на 2rem больше контейнера */
       width: calc(100% + 4rem);
-      /* сдвигаем на 1rem влево и вправо, чтобы вернуть в сетку */
       margin: 0 -1rem 1.5rem;
-      /* немного больше внутренних отступов по бокам */
       padding: 1rem 1.5rem;
       box-shadow: 0 .125rem .25rem rgba(0,0,0,0.075);
     }
@@ -27,6 +24,7 @@
     .company-header .company-meta {
       margin-top: .5rem;
       display: flex;
+      flex-wrap: wrap;         /* разрешаем перенос бейджей на новую строку */
       align-items: center;
       gap: .5rem;
     }
@@ -34,6 +32,15 @@
     .company-header .company-meta small {
       font-size: .9rem;
       padding: .4em .6em;
+      white-space: normal;     /* текст внутри бейджа может переноситься */
+      word-break: break-word;  /* длинные слова переносятся по частям */
+      max-width: 100%;
+    }
+    /* Ограничиваем ширину жёлтого бейджа и обрезаем многоточием */
+    .company-header .company-meta .badge.bg-warning {
+      max-width: 60ch;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* ─── Список этапов ─────────────────────────────────────────────────────── */
@@ -58,44 +65,76 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
-    .status-item.passed { border-left: .25rem solid #138f3f; background: #d4edda; color: #0c4e1e; }
-    .status-item.current { border-left: .25rem solid #856404; background: #fff3cd; color: #856404; }
-    .status-item.paused  { border-left: .25rem solid #ced4da; background: #f8f9fa; color: #6c757d; }
+    .status-item.passed   { border-left: .25rem solid #138f3f; background: #d4edda; color: #0c4e1e; }
+    .status-item.current  { border-left: .25rem solid #856404; background: #fff3cd; color: #856404; }
+    .status-item.paused   { border-left: .25rem solid #ced4da; background: #f8f9fa; color: #6c757d; }
 
-    .status-date, .expected-end {
-      font-size: .85rem; color: #6c757d; margin-top: .25rem;
+    .status-date,
+    .expected-end {
+      font-size: .85rem;
+      color: #6c757d;
+      margin-top: .25rem;
     }
-    .expected-end { color: #0c5460; }
+    .expected-end {
+      color: #0c5460;
+    }
 
     .badge-pdf {
-      font-size: .85rem; min-width: 3rem; text-align: center;
+      font-size: .85rem;
+      min-width: 3rem;
+      text-align: center;
     }
-    .btn-pdf, .btn-pause {
+    .btn-pdf,
+    .btn-pause {
       font-size: .85rem;
     }
 
     .stage-comment-list {
-      list-style: none; padding: 0; margin-top: .5rem;
-      max-height: 120px; overflow-y: auto;
+      list-style: none;
+      padding: 0;
+      margin-top: .5rem;
+      max-height: 120px;
+      overflow-y: auto;
     }
     .stage-comment-list li {
-      background: #f5f5f5; border-radius: 3px;
-      margin-bottom: .25rem; padding: .4rem .6rem;
+      background: #f5f5f5;
+      border-radius: 3px;
+      margin-bottom: .25rem;
+      padding: .4rem .6rem;
     }
 
     .full-history {
-      margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #dee2e6;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #dee2e6;
     }
     .history-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: .5rem; background: #fafafa; border-radius: 4px;
-      margin-bottom: .5rem; position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .5rem;
+      background: #fafafa;
+      border-radius: 4px;
+      margin-bottom: .5rem;
+      position: relative;
     }
-    .history-datetime { font-size: .85rem; color: #6c757d; margin-bottom: .25rem; }
-    .history-status { font-weight: 600; color: #495057; }
-    .history-actions { position: absolute; top: .5rem; right: .5rem; }
+    .history-datetime {
+      font-size: .85rem;
+      color: #6c757d;
+      margin-bottom: .25rem;
+    }
+    .history-status {
+      font-weight: 600;
+      color: #495057;
+    }
+    .history-actions {
+      position: absolute;
+      top: .5rem;
+      right: .5rem;
+    }
   </style>
 {% endblock %}
+
 
 {% block content %}
 <div class="container py-4" style="max-width: 900px;">

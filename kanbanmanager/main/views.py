@@ -276,15 +276,23 @@ def toggle_objection(request, company_id, hist_id):
 
 
 
+from django.contrib import messages
+from django.http import JsonResponse, HttpResponseNotAllowed
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
 @login_required
 @require_POST
 def move_company(request):
     """
-    Перемещение компании между статусами (Kanban).
+    Перемещение компании между статусами.
+    Различаем AJAX (возвращаем JSON) и обычные формы (редирект + flash).
     """
     cid = request.POST.get('company_id')
     sid = request.POST.get('status_id') or None
 
+    # Ограничение по регионам
     if request.user.is_staff:
         qs = Company.objects
     else:
@@ -298,40 +306,62 @@ def move_company(request):
     new_status = get_object_or_404(Status, pk=sid) if sid else None
     new_order  = new_status.order if new_status else None
 
-    # Запрет на «откат назад» для обычных пользователей
-    if not request.user.is_staff and old_order is not None and new_order is not None:
-        if new_order < old_order:
+    # Запрет на откат назад
+    if (not request.user.is_staff 
+        and old_order is not None 
+        and new_order is not None 
+        and new_order < old_order):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({
-                'result':  'error',
-                'message': 'Вы не можете перевести компанию на более ранний этап.'
+                'result': 'error',
+                'message': 'Нельзя перевести на более ранний этап.'
             }, status=403)
+        messages.error(request, "Вы не можете перевести компанию на более ранний этап.")
+        return redirect('main:company_detail', company.pk)
 
-    # Если ничего не изменилось, сразу выходим
+    # Если статус не изменился — ничего не делаем
     if (old_status is None and new_status is None) or (
-       old_status is not None and new_status is not None and old_status.id == new_status.id):
-        return JsonResponse({'result': 'ok'})
+        old_status and new_status and old_status.id == new_status.id
+    ):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'result': 'ok'})
+        return redirect('main:company_detail', company.pk)
 
     now = timezone.now()
 
-    # 1) Если перескакиваем через несколько этапов вперед
+    # Пропуск промежуточных этапов
     if old_status and new_status and new_order is not None and old_order is not None:
         if new_order > old_order + 1:
-            skipped_statuses = Status.objects.filter(
+            skipped = Status.objects.filter(
                 order__gt=old_order, order__lt=new_order
             ).order_by('order')
-            for skipped in skipped_statuses:
+            for st in skipped:
                 CompanyStatusHistory.objects.create(
                     company=company,
-                    status=skipped,
-                    changed_at=now
+                    status=st,
+                    changed_at=now,
                 )
 
-    # 2) Создаём запись истории для нового статуса и сохраняем его
-    CompanyStatusHistory.objects.create(company=company, status=new_status, changed_at=now)
+    # Запись истории и сохранение нового статуса
+    CompanyStatusHistory.objects.create(
+        company=company,
+        status=new_status,
+        changed_at=now,
+    )
     company.status = new_status
     company.save(update_fields=['status'])
 
-    return JsonResponse({'result': 'ok'})
+    # Если запрос AJAX — вернуть JSON
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'result': 'ok'})
+
+    # Иначе — редирект на detail с сообщением
+    messages.success(
+        request,
+        f"Статус компании «{company.name}» успешно изменён на «{new_status.name if new_status else 'Без статуса'}»."
+    )
+    return redirect('main:company_detail', company.pk)
+
 
 
 @login_required
@@ -532,69 +562,53 @@ from django.contrib.auth.decorators import login_required
 from .models import Company, Status
 from .forms import CompanyForm
 
+# views.py
+
 @login_required
 def edit_company(request, pk):
-    """
-    Редактирование компании.
-    Если пользователь не staff, запрещаем выбирать в поле "status"
-    статус с меньшим order (т. е. «ехать назад»).
-    """
-    # --------------------------
-    # 1) Получаем объект компании
-    # --------------------------
+    # 1. Получаем компанию
     if request.user.is_staff:
         company = get_object_or_404(Company, pk=pk)
     else:
-        # Обычный пользователь может редактировать только в своём регионе
-        user_regions = request.user.profile.regions.values_list('code', flat=True)
-        company = get_object_or_404(Company, pk=pk, region__in=user_regions)
+        regions = request.user.profile.regions.values_list('code', flat=True)
+        company = get_object_or_404(Company, pk=pk, region__in=regions)
 
-    # Запомним старый статус и его order (или None/−1, если статуса нет)
     old_status = company.status
-    old_order = old_status.order if old_status else -1
+    old_order  = old_status.order if old_status else -1
 
-    # ------------------------------------------------
-    # 2) Обработка POST-запроса: проверяем «откат назад»
-    # ------------------------------------------------
-    if request.method == 'POST':
-        # Передаём user=request.user в форму, чтобы она правильно работала
+    # 2. Обработка POST-запроса редактирования полей (название, БИН и т. д.)
+    if request.method == 'POST' and 'save_details' in request.POST:
         form = CompanyForm(request.POST, instance=company, user=request.user)
         if form.is_valid():
-            # Получили «новый» статус из формы
             new_status = form.cleaned_data.get('status')
-            new_order = new_status.order if new_status else -1
+            new_order  = new_status.order if new_status else -1
 
-            # Если пользователь не staff и пытается «ехать назад» (new_order < old_order)
             if not request.user.is_staff and new_order < old_order:
-                # Выводим сообщение об ошибке и возвращаем форму без сохранения
-                messages.error(
-                    request,
-                    "Вы не можете изменить статус на более ранний этап."
-                )
-                # Просто рендерим тот же шаблон с формой (с уже введёнными данными и ошибкой)
-                return render(request, 'main/company_form.html', {
-                    'title': 'Редактировать компанию',
-                    'form': form,
-                })
-
-            # Если проверка пройдена, сохраняем изменения
-            c = form.save(commit=False)
-            # Для обычных пользователей фиксируем регион (если они не могут его менять)
-            if not request.user.is_staff:
-                user_regions = request.user.profile.regions.values_list('code', flat=True)
-                if user_regions:
-                    c.region = user_regions[0]
-            c.save()
-            messages.success(request, "Компания успешно сохранена.")
-            return redirect('main:index')
+                messages.error(request, "Нельзя выбрать более ранний этап.")
+            else:
+                c = form.save(commit=False)
+                if not request.user.is_staff:
+                    c.region = regions[0] if regions else c.region
+                c.save()
+                messages.success(request, "Данные компании сохранены.")
+                return redirect('main:company_detail', company.pk)
     else:
-        # GET-запрос: просто показываем заполненную форму
         form = CompanyForm(instance=company, user=request.user)
 
+    # 3. Вариант POST для смены статуса идёт в отдельный view move_company,
+    #    поэтому здесь мы просто готовим шаблон.
+
+    # Список всех статусов
+    statuses = Status.objects.all().order_by('order')
+
     return render(request, 'main/company_form.html', {
-        'title': 'Редактировать компанию',
-        'form': form,
+        'title':   'Редактировать компанию',
+        'company': company,
+        'form':    form,
+        'statuses': statuses,
     })
+
+
 
 
 @login_required
