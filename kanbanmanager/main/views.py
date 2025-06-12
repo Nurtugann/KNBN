@@ -745,77 +745,98 @@ def signup(request):
 
 @login_required
 def companies_table(request):
+    # --- Параметры фильтрации и сортировки из GET ---
     q              = request.GET.get('q', '').strip()
     overdue_filter = request.GET.get('overdue') == '1'
-    sort_field     = request.GET.get('sort') or ''         # 'name' или ''
-    sort_dir       = request.GET.get('dir') or 'asc'       # 'asc' или 'desc'
+    sort_field     = request.GET.get('sort') or ''
+    sort_dir       = request.GET.get('dir') or 'asc'
+    current_region = request.GET.get('region', '')
 
+    # --- Статусы для шапки таблицы ---
     statuses = Status.objects.all().order_by('order')
 
+    # --- Базовый queryset компаний с учётом прав доступа ---
     if request.user.is_staff:
         companies_qs = Company.objects.all()
     else:
         user_regions = request.user.profile.regions.values_list('code', flat=True)
         companies_qs = Company.objects.filter(region__in=user_regions)
 
-    # Аннотации, как было
-    companies_qs = companies_qs.select_related('status')
-    max_order_subquery = CompanyStatusHistory.objects.filter(
-        company=OuterRef('pk'),
-        status__isnull=False
-    ).order_by().values('company').annotate(
-        max_order=Max('status__order')
-    ).values('max_order')
+    # --- Фильтр по региону из GET ---
+    if current_region:
+        companies_qs = companies_qs.filter(region=current_region)
 
-    companies = companies_qs.annotate(
-        passed_max_order=Subquery(max_order_subquery, output_field=IntegerField()),
-        curr_order=Coalesce('status__order', Value(0))
-    ).annotate(
-        max_reached=Greatest('curr_order', Coalesce('passed_max_order', Value(0)))
+    # --- Аннотации для вычисления пройденных и текущего этапов ---
+    companies_qs = companies_qs.select_related('status')
+    max_order_subquery = (
+        CompanyStatusHistory.objects
+          .filter(company=OuterRef('pk'), status__isnull=False)
+          .values('company')
+          .annotate(max_order=Max('status__order'))
+          .values('max_order')
+    )
+    companies_qs = (
+        companies_qs
+          .annotate(
+             passed_max_order=Subquery(max_order_subquery, output_field=IntegerField()),
+             curr_order=Coalesce('status__order', Value(0))
+           )
+          .annotate(
+             max_reached=Greatest('curr_order', Coalesce('passed_max_order', Value(0)))
+           )
     )
 
-    companies = list(companies)
-    now       = timezone.now()
-
+    # --- Переводим в список и считаем is_overdue, is_paused ---
+    companies = list(companies_qs)
+    now = timezone.now()
     for c in companies:
-        # пересчёт is_overdue
-        if c.curr_order == 0:
+        # is_overdue
+        if c.curr_order == 0 or not c.status or c.status.duration_days == 0:
             c.is_overdue = False
         else:
-            last_record = CompanyStatusHistory.objects.filter(
-                company=c,
-                status__order=c.max_reached
-            ).order_by('-changed_at').first()
-            if not last_record or not c.status or c.status.duration_days == 0:
-                c.is_overdue = False
-            else:
-                c.is_overdue = count_workdays(last_record.changed_at, now) > c.status.duration_days
+            last_rec = (
+                CompanyStatusHistory.objects
+                  .filter(company=c, status__order=c.max_reached)
+                  .order_by('-changed_at')
+                  .first()
+            )
+            c.is_overdue = bool(last_rec and
+                                count_workdays(last_rec.changed_at, now) > c.status.duration_days)
 
-        # флаг «на паузе» для текущего этапа
-        last_current = CompanyStatusHistory.objects.filter(
-            company=c, status=c.status
-        ).order_by('-changed_at').first()
+        # is_paused (обжалование)
+        last_current = (
+            CompanyStatusHistory.objects
+              .filter(company=c, status=c.status)
+              .order_by('-changed_at')
+              .first()
+        )
         c.is_paused = bool(last_current and last_current.is_paused)
 
-    # фильтры q и overdue
+    # --- Фильтрация по q (названию или БИН) и только просроченные ---
     if q:
         ql = q.lower()
         companies = [
-            c for c in companies if ql in c.name.lower() or (c.bin_number and ql in str(c.bin_number).lower())
+            c for c in companies
+            if ql in c.name.lower() or (c.bin_number and ql in str(c.bin_number).lower())
         ]
-
     if overdue_filter:
         companies = [c for c in companies if c.is_overdue]
 
-    # сортировка по имени
+    # --- Сортировка по имени (если указано) ---
     if sort_field == 'name':
         reverse = (sort_dir == 'desc')
         companies.sort(key=lambda c: c.name.lower(), reverse=reverse)
 
+    # --- Список регионов для выпадающего фильтра ---
+    regions = Region.objects.values_list('code', 'name')
+
+    # --- Рендерим шаблон ---
     return render(request, 'main/companies_table.html', {
         'statuses':       statuses,
         'companies':      companies,
         'q':              q,
+        'current_region': current_region,
+        'regions':        regions,
         'overdue_filter': overdue_filter,
         'sort_field':     sort_field,
         'sort_dir':       sort_dir,

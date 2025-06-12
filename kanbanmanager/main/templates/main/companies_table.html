@@ -186,9 +186,8 @@
     <a href="{% url 'main:add_company' %}" class="btn btn-success">Добавить новую компанию</a>
   </div>
 
-  <!-- ─── Форма фильтров ──────────────────────────────────────────── -->
   <form method="get" class="row gx-2 gy-2 align-items-center mb-4">
-    <!-- Поиск: занимает половину ширины на md+ и всю на xs -->
+    <!-- Поиск -->
     <div class="col-12 col-md-6">
       <input
         type="text"
@@ -199,7 +198,20 @@
       >
     </div>
 
-    <!-- Чекбокс остаётся auto-width -->
+    <!-- Фильтр по региону -->
+    <div class="col-auto">
+      <select name="region" class="form-select">
+        <option value="">Все регионы</option>
+        {% for code,name in regions %}
+          <option value="{{ code }}"
+                  {% if code == current_region %}selected{% endif %}>
+            {{ name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Только просроченные -->
     <div class="col-auto">
       <div class="form-check">
         <input
@@ -216,13 +228,12 @@
       </div>
     </div>
 
-    <!-- Кнопка тоже auto-width -->
+    <!-- Кнопка Применить -->
     <div class="col-auto">
-      <button type="submit" class="btn btn-primary">
-        Применить
-      </button>
+      <button type="submit" class="btn btn-primary">Применить</button>
     </div>
   </form>
+
 
 
   <!--
