@@ -4,6 +4,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from main import views as main_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,3 +26,7 @@ urlpatterns = [
     # Все остальные маршруты (index, company/<pk>/, board/, и т. д.)
     path('', include(('main.urls', 'main'), namespace='main')),
 ]
+
+if settings.DEBUG:
+    # здесь — именно в корневом urls.py !
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -19,6 +19,17 @@ urlpatterns = [
     path('edit/<int:pk>/', views.edit_company, name='edit_company'),
     path('delete/<int:pk>/', views.delete_company, name='delete_company'),
 
+    # urls.py
+    path(
+        'history/<int:history_id>/delete/',
+        views.delete_status_history,
+        name='delete_status_history'
+    ),
+
+
+
+
+
     # Перемещение и переупорядочивание компаний на Kanban-доске
     path('move/', views.move_company, name='move_company'),
     path('reorder/', views.reorder_companies, name='reorder_companies'),

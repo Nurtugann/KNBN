@@ -276,11 +276,14 @@ def toggle_objection(request, company_id, hist_id):
 
 
 
-from django.contrib import messages
-from django.http import JsonResponse, HttpResponseNotAllowed
-from django.shortcuts import get_object_or_404, redirect
-from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.utils import timezone
+
+from .models import Company, Status, CompanyStatusHistory
 
 @login_required
 @require_POST
@@ -289,6 +292,8 @@ def move_company(request):
     Перемещение компании между статусами.
     Различаем AJAX (возвращаем JSON) и обычные формы (редирект + flash).
     """
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
     cid = request.POST.get('company_id')
     sid = request.POST.get('status_id') or None
 
@@ -307,30 +312,31 @@ def move_company(request):
     new_order  = new_status.order if new_status else None
 
     # Запрет на откат назад
-    if (not request.user.is_staff 
-        and old_order is not None 
-        and new_order is not None 
+    if (not request.user.is_staff
+        and old_order is not None
+        and new_order is not None
         and new_order < old_order):
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        if is_ajax:
             return JsonResponse({
                 'result': 'error',
                 'message': 'Нельзя перевести на более ранний этап.'
             }, status=403)
         messages.error(request, "Вы не можете перевести компанию на более ранний этап.")
-        return redirect('main:company_detail', company.pk)
+        return redirect('main:company_detail', pk=company.pk)
 
     # Если статус не изменился — ничего не делаем
-    if (old_status is None and new_status is None) or (
+    same = (old_status is None and new_status is None) or (
         old_status and new_status and old_status.id == new_status.id
-    ):
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    )
+    if same:
+        if is_ajax:
             return JsonResponse({'result': 'ok'})
-        return redirect('main:company_detail', company.pk)
+        return redirect('main:company_detail', pk=company.pk)
 
     now = timezone.now()
 
     # Пропуск промежуточных этапов
-    if old_status and new_status and new_order is not None and old_order is not None:
+    if old_status and new_status and old_order is not None and new_order is not None:
         if new_order > old_order + 1:
             skipped = Status.objects.filter(
                 order__gt=old_order, order__lt=new_order
@@ -351,16 +357,17 @@ def move_company(request):
     company.status = new_status
     company.save(update_fields=['status'])
 
-    # Если запрос AJAX — вернуть JSON
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    # AJAX: возвращаем JSON
+    if is_ajax:
         return JsonResponse({'result': 'ok'})
 
-    # Иначе — редирект на detail с сообщением
+    # Обычный запрос: редирект + flash
     messages.success(
         request,
         f"Статус компании «{company.name}» успешно изменён на «{new_status.name if new_status else 'Без статуса'}»."
     )
-    return redirect('main:company_detail', company.pk)
+    return redirect('main:company_detail', pk=company.pk)
+
 
 
 
@@ -698,37 +705,37 @@ def edit_status_history(request, history_id):
     })
 
 
-@login_required
-def delete_status_history(request, history_id):
-    """
-    Удаляет запись истории, если она не является последней для компании.
-    """
-    if request.user.is_staff:
-        h = get_object_or_404(CompanyStatusHistory, pk=history_id)
-    else:
-        user_regions = request.user.profile.regions.values_list('code', flat=True)
-        h = get_object_or_404(
-            CompanyStatusHistory,
-            pk=history_id,
-            company__region__in=user_regions
-        )
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
+@login_required
+@require_POST
+def delete_status_history(request, history_id):
+    # выбор объекта, проверки регионов те же, что и было
+    h = get_object_or_404(CompanyStatusHistory, pk=history_id, 
+        **(request.user.is_staff and {} or {
+            'company__region__in': request.user.profile.regions.values_list('code', flat=True)
+        })
+    )
     company = h.company
     latest = CompanyStatusHistory.objects.filter(company=company).order_by('-changed_at').first()
+
+    # нельзя удалить последнюю запись
     if h.pk == latest.pk:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'result':'error','message':'Нельзя удалить текущую запись.'}, status=400)
         messages.error(request, "Нельзя удалить текущую запись истории.")
         return redirect('main:company_detail', pk=company.pk)
 
-    if request.method == 'POST':
-        h.delete()
-        messages.success(request, "Запись истории удалена.")
-        return redirect('main:company_detail', pk=company.pk)
+    # удаляем
+    h.delete()
 
-    return render(request, 'main/history_confirm_delete.html', {
-        'title':   f'Удалить историю для «{company.name}»',
-        'history': h,
-        'company': company,
-    })
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'result':'ok'})
+
+    messages.success(request, "Запись истории удалена.")
+    return redirect('main:company_detail', pk=company.pk)
+
 
 
 def signup(request):
@@ -843,52 +850,60 @@ def companies_table(request):
     })
 
 
+# views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Company, Status, CompanyStatusDocument
+
 @login_required
 def attach_docs(request, company_id, status_id):
     """
     Загрузка и просмотр PDF-файлов для Company + Status.
     Поддерживает множественный выбор.
     """
-    # проверяем права
+    # 1) Получаем компанию с проверкой прав по региону
     if request.user.is_staff:
         company = get_object_or_404(Company, pk=company_id)
     else:
         user_regions = request.user.profile.regions.values_list('code', flat=True)
         company = get_object_or_404(Company, pk=company_id, region__in=user_regions)
 
+    # 2) И статус
     status = get_object_or_404(Status, pk=status_id)
 
-    # уже загруженные документы
+    # 3) Уже загруженные документы, чтобы их вывести на странице
     docs = CompanyStatusDocument.objects.filter(
         company=company,
         status=status
     ).order_by('-uploaded_at')
 
+    # 4) Обработка POST — сохраняем каждый файл из списка
     if request.method == 'POST':
-        form = CompanyStatusDocumentForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Получаем список загруженных файлов из поля name="files"
-            files = request.FILES.getlist('files')
-            created_count = 0
-
+        files = request.FILES.getlist('files')
+        if not files:
+            messages.error(request, "Вы не выбрали ни одного файла.")
+        else:
+            saved = 0
             for f in files:
+                if f.content_type != 'application/pdf':
+                    messages.warning(request, f"«{f.name}» пропущен — не PDF.")
+                    continue
                 CompanyStatusDocument.objects.create(
                     company=company,
                     status=status,
                     file=f
                 )
-                created_count += 1
+                saved += 1
+            messages.success(request, f"Успешно загружено {saved} файл(ов).")
+        # Редирект, чтобы не дублировать POST при F5
+        return redirect('main:attach_docs', company_id=company.pk, status_id=status.pk)
 
-            messages.success(request, f"Успешно загружено {created_count} файл(ов).")
-            return redirect('main:attach_docs', company_id=company.pk, status_id=status.pk)
-    else:
-        form = CompanyStatusDocumentForm()
-
+    # 5) GET — показываем шаблон
     return render(request, 'main/attach_docs.html', {
         'company': company,
         'status':  status,
         'docs':    docs,
-        'form':    form,
     })
 
 

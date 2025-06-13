@@ -171,17 +171,6 @@
 
   <hr class="my-4">
 
-  {# Next step button #}
-  {% if next_status %}
-    <form id="nextStepForm" method="post" action="{% url 'main:move_company' %}" class="mb-4">
-      {% csrf_token %}
-      <input type="hidden" name="company_id" value="{{ company.pk }}">
-      <input type="hidden" name="status_id"  value="{{ next_status.pk }}">
-      <button class="btn btn-success btn-sm">
-        Перейти к следующему этапу: {{ next_status.name }}
-      </button>
-    </form>
-  {% endif %}
 
   {# Toggle statuses #}
   <div class="d-flex justify-content-between align-items-center mb-2">
@@ -226,6 +215,18 @@
                 {% if hist.is_paused %}Завершить обжалование{% else %}Обжалование{% endif %}
               </button>
             {% endif %}
+            {# рядом с текущим статусом #}
+            {% if st.id == company.status_id and next_status %}
+              <form class="move-company-form d-inline" method="post" action="{% url 'main:move_company' %}">
+                {% csrf_token %}
+                <input type="hidden" name="company_id" value="{{ company.pk }}">
+                <input type="hidden" name="status_id"  value="{{ next_status.pk }}">
+                <button class="btn btn-success btn-sm">
+                  Перейти к следующему этапу: {{ next_status.name }}
+                </button>
+              </form>
+            {% endif %}
+
           </div>
 
           <ul class="stage-comment-list mt-3">
@@ -254,42 +255,12 @@
     </ul>
   </div>
 
-  {# Company comments #}
-  <h4 class="mt-4">Комментарии к компании</h4>
-  <ul class="list-group mb-4">
-    {% for com in company_comments %}
-      <li class="list-group-item">
-        <small class="text-muted">{{ com.author.username }}, {{ com.created_at|date:"Y-m-d H:i" }}</small>
-        <p class="mb-0">{{ com.text }}</p>
-      </li>
-    {% empty %}
-      <li class="list-group-item text-muted">Нет комментариев к компании</li>
-    {% endfor %}
-  </ul>
-
-  <form method="post" class="mb-5">
-    {% csrf_token %}
-    <input type="hidden" name="company_comment" value="1">
-    <div class="mb-3">
-      {{ form.text.label_tag }}
-      {{ form.text }}
-      {{ form.text.errors }}
-    </div>
-    <button class="btn btn-primary">Добавить комментарий</button>
-  </form>
-
-  {% if request.user.is_staff %}
-    <a href="{% url 'main:add_status_history' company.pk %}"
-       class="btn btn-outline-secondary btn-sm mb-4">
-      Добавить запись в историю
-    </a>
-  {% endif %}
-
   {# Full history #}
-  <div class="full-history">
+  <div class="full-history" id="full-history">
     <h4>История смены статусов</h4>
     {% for h in full_history %}
-      <div class="history-item">
+      {# добавляем data-history-id и класс delete-history-form на форму #}
+      <div class="history-item" data-history-id="{{ h.id }}">
         <div>
           <div class="history-datetime">{{ h.changed_at|date:"Y-m-d H:i" }}</div>
           <div class="history-status">
@@ -300,11 +271,12 @@
         {% if request.user.is_staff %}
           <div class="history-actions">
             <a href="{% url 'main:edit_status_history' h.id %}"
-               class="btn btn-outline-secondary btn-sm">✎</a>
+              class="btn btn-outline-secondary btn-sm">✎</a>
             <form method="post"
                   action="{% url 'main:delete_status_history' h.id %}"
-                  class="d-inline">{% csrf_token %}
-              <button class="btn btn-outline-danger btn-sm">🗑</button>
+                  class="delete-history-form d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger btn-sm">🗑</button>
             </form>
           </div>
         {% endif %}
@@ -314,6 +286,7 @@
     {% endfor %}
   </div>
 
+
   <button onclick="history.back()" class="btn btn-secondary mt-4">
     ← Назад
   </button>
@@ -321,91 +294,102 @@
 {% endblock %}
 
 {% block extra_js %}
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Toggle statuses visibility
-      const toggleBtn = document.getElementById('toggleStatusesBtn');
-      const container = document.getElementById('statusesContainer');
-      if (toggleBtn && container) {
-        toggleBtn.addEventListener('click', function() {
-          const hidden = container.style.display === 'none';
-          container.style.display = hidden ? '' : 'none';
-          this.textContent = hidden ? 'Свернуть этапы' : 'Показать этапы';
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // 1) Переключатель видимости списка этапов
+  const toggleBtn = document.getElementById('toggleStatusesBtn'),
+        statuses  = document.getElementById('statusesContainer');
+  if (toggleBtn && statuses) {
+    toggleBtn.addEventListener('click', () => {
+      const hidden = statuses.style.display === 'none';
+      statuses.style.display = hidden ? '' : 'none';
+      toggleBtn.textContent = hidden ? 'Свернуть этапы' : 'Показать этапы';
+    });
+  }
+
+  // 2) AJAX-перевод на следующий этап для любой формы .move-company-form
+  document.querySelectorAll('form.move-company-form').forEach(form => {
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      document.querySelectorAll('.ajax-notice').forEach(n => n.remove());
+      const csrftoken = document.querySelector('meta[name="csrf-token"]').content;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'X-CSRFToken': csrftoken,
+            'Accept':      'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: new FormData(form)
         });
-      }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const ct = res.headers.get('Content-Type') || '';
+        if (!ct.includes('application/json')) {
+          const html = await res.text();
+          throw new Error(`Неверный Content-Type: ${ct}`);
+        }
+        const data = await res.json();
+        if (data.result !== 'ok') throw new Error(data.message || 'Неожиданный ответ от сервера');
 
-      // вместо document.querySelectorAll('.btn-pause')
-      document.querySelectorAll('.btn-objection').forEach(btn => {
-        btn.addEventListener('click', async e => {
-          e.preventDefault();
-          const url = btn.dataset.toggleUrl;
-          const csrftoken = document.querySelector('meta[name="csrf-token"]').content;
-          try {
-            const res = await fetch(url, {
-              method: 'POST',
-              headers: { 'X-CSRFToken': csrftoken, 'Accept': 'application/json' }
-            });
-            const data = await res.json();
-            if (data.result !== 'ok') throw new Error(data.message);
+        // Успех: заменяем форму на уведомление
+        const notice = document.createElement('div');
+        notice.className = 'alert alert-success ajax-notice mt-3';
+        notice.textContent = 'Перешли на следующий этап';
+        form.replaceWith(notice);
 
-            // Обновляем текст и стиль кнопки
-            if (data.is_paused) {
-              btn.textContent = 'Завершить обжалование';
-              btn.classList.replace('btn-outline-danger', 'btn-danger');
-            } else {
-              btn.textContent = 'Обжалование';
-              btn.classList.replace('btn-danger', 'btn-outline-danger');
-              // Сбрасываем старт и expected_end
-              const li = btn.closest('li.status-item');
-              li.classList.remove('paused');
-              li.classList.add('current');
-              // Перезаписываем дату старта
-              const dateEl = li.querySelector('.status-date');
-              dateEl.textContent = `Начало: ${data.new_changed_at} — 0 раб. д.`;
-              // Обновляем или вставляем expected_end
-              let ee = li.querySelector('.expected-end');
-              if (!ee && data.new_expected_end) {
-                ee = document.createElement('div');
-                ee.classList.add('expected-end');
-                li.querySelector('div').appendChild(ee);
-              }
-              if (ee) ee.textContent = `Ожидаемый конец: ${data.new_expected_end}`;
-            }
-          } catch(err) {
-            console.error(err);
-            alert('Ошибка при обжаловании: ' + err.message);
-          }
-        });
-      });
-
-
-      // Next step AJAX
-      const nextForm = document.getElementById('nextStepForm');
-      if (nextForm) {
-        nextForm.addEventListener('submit', async e => {
-          e.preventDefault();
-          const csrftoken = document.querySelector('meta[name="csrf-token"]').content;
-          const data = new URLSearchParams(new FormData(nextForm));
-          try {
-            const res = await fetch(nextForm.action, {
-              method: 'POST',
-              headers: { 'X-CSRFToken': csrftoken, 'Accept': 'application/json' },
-              body: data
-            });
-            const json = await res.json();
-            if (json.result !== 'ok') throw '';
-            const notice = document.createElement('div');
-            notice.className = 'alert alert-success mt-3';
-            notice.textContent = 'Статус изменён! Пожалуйста, обновите страницу.';
-            nextForm.after(notice);
-          } catch {
-            const notice = document.createElement('div');
-            notice.className = 'alert alert-danger mt-3';
-            notice.textContent = 'Не удалось перейти к следующему этапу.';
-            nextForm.after(notice);
-          }
-        });
+      } catch (err) {
+        console.error(err);
+        const fail = document.createElement('div');
+        fail.className = 'alert alert-danger ajax-notice mt-3';
+        fail.textContent = 'Не удалось перейти: ' + err.message;
+        form.after(fail);
       }
     });
-  </script>
+  });
+
+  // 3) AJAX-удаление записи истории для любой формы .delete-history-form
+  document.querySelectorAll('form.delete-history-form').forEach(form => {
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      document.querySelectorAll('.ajax-notice').forEach(n => n.remove());
+      const csrftoken = document.querySelector('meta[name="csrf-token"]').content;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'X-CSRFToken': csrftoken,
+            'Accept':      'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        const ct = res.headers.get('Content-Type') || '';
+        if (!res.ok || !ct.includes('application/json')) {
+          const text = await res.text();
+          throw new Error(`HTTP ${res.status}: ${text}`);
+        }
+        const data = await res.json();
+        if (data.result !== 'ok') throw new Error(data.message || 'Ошибка на сервере');
+
+        // Удаляем запись из DOM
+        const item = form.closest('.history-item');
+        item.remove();
+
+      } catch (err) {
+        console.error(err);
+        const fail = document.createElement('div');
+        fail.className = 'alert alert-danger ajax-notice mt-2';
+        fail.textContent = 'Не удалось удалить: ' + err.message;
+        form.after(fail);
+      }
+    });
+  });
+
+});
+</script>
 {% endblock %}
+
+
