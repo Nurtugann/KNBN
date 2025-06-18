@@ -752,74 +752,70 @@ def signup(request):
 
 @login_required
 def companies_table(request):
-    # --- Параметры фильтрации и сортировки из GET ---
     q              = request.GET.get('q', '').strip()
     overdue_filter = request.GET.get('overdue') == '1'
     sort_field     = request.GET.get('sort') or ''
     sort_dir       = request.GET.get('dir') or 'asc'
     current_region = request.GET.get('region', '')
 
-    # --- Статусы для шапки таблицы ---
-    statuses = Status.objects.all().order_by('order')
+    # --- Группировка статусов ---
+    group1 = Status.objects.filter(order__lt=9).order_by('order')
+    group2 = Status.objects.filter(order__gte=9).order_by('order')
+    grouped_statuses = [
+        ("Блок 1: Претензия - исковая работа", list(group1)),
+        ("Блок 2: Исполнительное производство", list(group2)),
+    ]
 
-    # --- Базовый queryset компаний с учётом прав доступа ---
     if request.user.is_staff:
         companies_qs = Company.objects.all()
     else:
         user_regions = request.user.profile.regions.values_list('code', flat=True)
         companies_qs = Company.objects.filter(region__in=user_regions)
 
-    # --- Фильтр по региону из GET ---
     if current_region:
         companies_qs = companies_qs.filter(region=current_region)
 
-    # --- Аннотации для вычисления пройденных и текущего этапов ---
     companies_qs = companies_qs.select_related('status')
     max_order_subquery = (
         CompanyStatusHistory.objects
-          .filter(company=OuterRef('pk'), status__isnull=False)
-          .values('company')
-          .annotate(max_order=Max('status__order'))
-          .values('max_order')
+            .filter(company=OuterRef('pk'), status__isnull=False)
+            .values('company')
+            .annotate(max_order=Max('status__order'))
+            .values('max_order')
     )
     companies_qs = (
         companies_qs
-          .annotate(
-             passed_max_order=Subquery(max_order_subquery, output_field=IntegerField()),
-             curr_order=Coalesce('status__order', Value(0))
-           )
-          .annotate(
-             max_reached=Greatest('curr_order', Coalesce('passed_max_order', Value(0)))
-           )
+        .annotate(
+            passed_max_order=Subquery(max_order_subquery, output_field=IntegerField()),
+            curr_order=Coalesce('status__order', Value(0))
+        )
+        .annotate(
+            max_reached=Greatest('curr_order', Coalesce('passed_max_order', Value(0)))
+        )
     )
 
-    # --- Переводим в список и считаем is_overdue, is_paused ---
     companies = list(companies_qs)
     now = timezone.now()
     for c in companies:
-        # is_overdue
         if c.curr_order == 0 or not c.status or c.status.duration_days == 0:
             c.is_overdue = False
         else:
             last_rec = (
                 CompanyStatusHistory.objects
-                  .filter(company=c, status__order=c.max_reached)
-                  .order_by('-changed_at')
-                  .first()
+                    .filter(company=c, status__order=c.max_reached)
+                    .order_by('-changed_at')
+                    .first()
             )
-            c.is_overdue = bool(last_rec and
-                                count_workdays(last_rec.changed_at, now) > c.status.duration_days)
+            c.is_overdue = bool(last_rec and count_workdays(last_rec.changed_at, now) > c.status.duration_days)
 
-        # is_paused (обжалование)
         last_current = (
             CompanyStatusHistory.objects
-              .filter(company=c, status=c.status)
-              .order_by('-changed_at')
-              .first()
+                .filter(company=c, status=c.status)
+                .order_by('-changed_at')
+                .first()
         )
         c.is_paused = bool(last_current and last_current.is_paused)
 
-    # --- Фильтрация по q (названию или БИН) и только просроченные ---
     if q:
         ql = q.lower()
         companies = [
@@ -829,24 +825,21 @@ def companies_table(request):
     if overdue_filter:
         companies = [c for c in companies if c.is_overdue]
 
-    # --- Сортировка по имени (если указано) ---
     if sort_field == 'name':
         reverse = (sort_dir == 'desc')
         companies.sort(key=lambda c: c.name.lower(), reverse=reverse)
 
-    # --- Список регионов для выпадающего фильтра ---
     regions = Region.objects.values_list('code', 'name')
 
-    # --- Рендерим шаблон ---
     return render(request, 'main/companies_table.html', {
-        'statuses':       statuses,
-        'companies':      companies,
-        'q':              q,
-        'current_region': current_region,
-        'regions':        regions,
-        'overdue_filter': overdue_filter,
-        'sort_field':     sort_field,
-        'sort_dir':       sort_dir,
+        'grouped_statuses': grouped_statuses,
+        'companies':        companies,
+        'q':                q,
+        'current_region':   current_region,
+        'regions':          regions,
+        'overdue_filter':   overdue_filter,
+        'sort_field':       sort_field,
+        'sort_dir':         sort_dir,
     })
 
 
@@ -929,3 +922,62 @@ def delete_doc(request, company_id, status_id, doc_id):
         return redirect('main:attach_docs', company_id=company.pk, status_id=status.pk)
 
     return redirect('main:attach_docs', company_id=company.pk, status_id=status.pk)
+
+
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Count
+from django.shortcuts import render
+from .models import Company, REGION_CHOICES
+
+@login_required
+def company_dashboard(request):
+    if request.user.is_staff:
+        companies = Company.objects.all()
+    else:
+        user_regions = request.user.profile.regions.values_list('code', flat=True)
+        companies = Company.objects.filter(region__in=user_regions)
+
+    # Группировка по коду региона
+    region_raw = (
+        companies
+        .values("region")
+        .annotate(
+            count=Count("id"),
+            total_debt=Sum("debt_amount"),
+            total_repaid=Sum("repaid_amount")
+        )
+        .order_by("region")
+    )
+
+    # Преобразование кодов регионов в названия
+    region_stats = []
+    for r in region_raw:
+        region_stats.append({
+            "region": dict(REGION_CHOICES).get(r["region"], r["region"]),
+            "count": r["count"],
+            "total_debt": r["total_debt"] or 0,
+            "total_repaid": r["total_repaid"] or 0,
+        })
+
+    context = {
+        "total_companies": companies.count(),
+        "total_debt": companies.aggregate(Sum("debt_amount"))["debt_amount__sum"] or 0,
+        "total_repaid": companies.aggregate(Sum("repaid_amount"))["repaid_amount__sum"] or 0,
+        "overdue_count": sum(
+            1 for c in companies
+            if c.debt_amount is not None and c.repaid_amount is not None and c.debt_amount > c.repaid_amount
+        ),
+        "region_stats": region_stats,
+        "status_stats": (
+            companies
+            .values("status__name")
+            .annotate(
+                count=Count("id"),
+                total_debt=Sum("debt_amount"),
+                total_repaid=Sum("repaid_amount")
+            )
+            .order_by("status__name")
+        ),
+    }
+
+    return render(request, "main/company_dashboard.html", context)

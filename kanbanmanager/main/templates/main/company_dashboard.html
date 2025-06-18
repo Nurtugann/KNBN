@@ -1,0 +1,94 @@
+{% extends 'main/base.html' %}
+{% block title %}Дашборд: Общая статистика по компаниям{% endblock %}
+
+{% block extra_css %}
+<style>
+  .card {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+  .region-table th, .region-table td {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-4">📊 Общая статистика по компаниям</h1>
+
+  <div class="row">
+    <div class="col-md-3">
+      <div class="card bg-light">
+        <div class="card-title">Общее количество компаний</div>
+        <div class="display-6">{{ total_companies }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-warning">
+        <div class="card-title">Суммарный долг</div>
+        <div class="display-6">{{ total_debt|floatformat:0 }} ₸</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-success text-white">
+        <div class="card-title">Погашено</div>
+        <div class="display-6">{{ total_paid|floatformat:0 }} ₸</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-danger text-white">
+        <div class="card-title">Просрочено</div>
+        <div class="display-6">{{ overdue_count }}</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="mt-4">📍 Статистика по регионам</h3>
+  <table class="table table-bordered region-table">
+    <thead class="table-light">
+      <tr>
+        <th>Регион</th>
+        <th>Компаний</th>
+        <th>Общий долг</th>
+        <th>Погашено</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for region in region_stats %}
+      <tr>
+        <td>{{ region.name }}</td>
+        <td>{{ region.count }}</td>
+        <td>{{ region.debt|floatformat:0 }} ₸</td>
+        <td>{{ region.paid|floatformat:0 }} ₸</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3 class="mt-4">⚖️ Статистика по судебным статусам</h3>
+  <table class="table table-bordered region-table">
+    <thead class="table-light">
+      <tr>
+        <th>Статус</th>
+        <th>Компаний</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for label, count in court_statuses.items %}
+      <tr>
+        <td>{{ label }}</td>
+        <td>{{ count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

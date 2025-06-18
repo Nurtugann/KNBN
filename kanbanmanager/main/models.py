@@ -132,6 +132,15 @@ class Company(models.Model):
         default="KST",
         help_text="Географический регион компании"
     )
+    repaid_amount = models.DecimalField(
+        "Сумма погашения",
+        max_digits=12,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text="Сумма уже погашенного долга (если есть)"
+    )
+
 
     class Meta:
         ordering = ["position"]

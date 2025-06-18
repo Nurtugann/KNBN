@@ -1,146 +1,62 @@
-{# templates/main/companies_table.html #}
 {% extends 'main/base.html' %}
 {% block title %}Табличный обзор: Компании и Статусы{% endblock %}
 
 {% block extra_css %}
   <style>
-    /* ─── «ЛИПКИЙ» ЛЕВЫЙ СТОЛБЕЦ ───────────────────────────────────── */
     .sticky-col {
       position: -webkit-sticky;
       position: sticky;
       left: 0;
       background-color: #ffffff;
-      z-index: 2;            /* Поверх остальных ячеек при скролле */
-      min-width: 200px;      /* Минимальная ширина первой колонки */
+      z-index: 2;
+      min-width: 200px;
     }
-
-    /* ─── ФЕЙКОВЫЙ СКРОЛЛБАР (над таблицей) ────────────────────────── */
+    .group-toggle-buttons {
+      margin-bottom: 1rem;
+    }
+    .group-toggle-buttons button {
+      margin-right: 0.5rem;
+    }
     .table-scroll-wrapper {
-      position: relative;
-    }
-    /* «Пустой» блок, который рисует полосу прокрутки */
-    .fake-scrollbar {
-      height: 8px;           /* Высота «узкой» полосы прокрутки */
       overflow-x: auto;
-      overflow-y: hidden;    /* Чтобы не сдвигать остальные элементы страницы вниз */
+      position: relative;
+      padding-top: 16px;
     }
-    /* Содержимое фейкового скролла — ровно такая же ширина, как у самой таблицы */
-    .fake-scrollbar .scroll-content {
-      width: 0;              /* JS установит правильную ширину */
-      height: 1px;           /* Достаточно хоть 1px по высоте для появления полосы */
-    }
-
-    /* ─── КОНТЕЙНЕР ДЛЯ ТАБЛИЦЫ ─────────────────────────────────────── */
-    .table-responsive {
+    .table-scroll-wrapper .fake-scrollbar {
+      height: 16px;
       overflow-x: auto;
       overflow-y: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #f8f9fa;
+      z-index: 3;
     }
-    /* Уменьшаем высоту строк, чтобы клетки с ✓/→/! не тянулись слишком высоко */
-    .table-responsive table td,
-    .table-responsive table th {
-      padding: 0.4rem 0.6rem;
+    .table-scroll-wrapper .fake-scrollbar .scroll-content {
+      height: 1px;
     }
-    /* Совсем убираем паддинги в «символьных» ячейках */
-    .table-responsive td.no-pad {
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+    th.status-header {
+      min-width: 100px;
+      max-width: 160px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.8rem;
+    }
+    td.no-pad {
       padding: 0 !important;
     }
-    .table-responsive td.no-pad a {
-      line-height: 2.2rem;             /* Чуть меньше, чем 2.5em */
+    td.no-pad a {
       display: block;
-      width: 100%;
-      height: 100%;
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.15s ease, background-color 0.15s ease;
-      border-radius: 4px;
-    }
-    .table-responsive td.no-pad a:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-      transform: scale(1.1);
-    }
-
-    /* ─── «ПРОЙДЕННЫЙ» СВЕТЛО-ЗЕЛЁНЫЙ ───────────────────────────────── */
-    .bg-success-light {
-      background-color: #c3e6cb !important; /* светло-зеленый фон */
-      color: #155724 !important;            /* тёмно-зеленый текст */
-    }
-    .bg-success-light a {
-      transition: transform 0.15s ease, background-color 0.15s ease;
-    }
-    .bg-success-light a:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-      transform: scale(1.1);
-    }
-
-    /* ─── «ТЕКУЩИЙ» ЖЁЛТЫЙ ───────────────────────────────────────────── */
-    .table-responsive td.bg-warning a {
-      transition: transform 0.15s ease, background-color 0.15s ease;
-    }
-    .table-responsive td.bg-warning a:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-      transform: scale(1.1);
-    }
-
-    /* ─── ЗАГОЛОВКИ СТАТУСОВ ───────────────────────────────────────── */
-    th.status-header {
-      min-width: 160px;      /* Немного больше, чтобы текст не резался */
-      max-width: 200px;
-      white-space: nowrap;   /* Не переносить внутри одного слова */
-      overflow: hidden;      /* Скрываем переполнение */
-      text-overflow: ellipsis; /* «...» при нехватке места */
-      padding: 0.6rem 0.8rem;
-      font-size: 0.9rem;
-      vertical-align: bottom;
-      text-align: center;
-    }
-
-    /* ─── СКРОЛЛБАР ПО МОТИВАМ ─────────────────────────────────────── */
-    .table-responsive::-webkit-scrollbar {
-      height: 8px;
-    }
-    .table-responsive::-webkit-scrollbar-thumb {
-      background-color: rgba(0,0,0,0.2);
-      border-radius: 4px;
-    }
-    .table-responsive::-webkit-scrollbar-track {
-      background-color: transparent;
-    }
-
-    /* ─── Дополнительная компактность ───────────────────────────────── */
-    .table-responsive table th,
-    .table-responsive table td {
-      padding: 0.25rem 0.5rem;  /* ещё чуть меньше */
-      font-size: 0.85rem;       /* чуть поменьше шрифт */
-    }
-
-    /* Уменьшаем ширину «липкой» колонки */
-    .sticky-col {
-      min-width: 160px !important;
-    }
-
-    /* Существенно уже заголовки-статусы */
-    th.status-header {
-      min-width: 120px !important;
-      max-width: 140px !important;
       padding: 0.25rem 0.5rem;
-      font-size: 0.85rem;
     }
-    /* Обжалование (пауза) — тёмно-серый фон */
-    .table-responsive td.bg-secondary.no-pad a {
-      color: #fff !important;
-      font-weight: bold;
-    }
-
-
-
-    /* ─── ПЛАВНОЕ ПОЯВЛЕНИЕ ЯЧЕЕК ПРИ ЗАГРУЗКЕ ───────────────────────── */
-    @keyframes fadeInCell {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    .table-responsive td,
-    .table-responsive th {
-      animation: fadeInCell 0.3s ease;
+    .hidden-group {
+      display: none !important;
     }
   </style>
 {% endblock %}
@@ -149,14 +65,13 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const wrapper       = document.querySelector('.table-scroll-wrapper');
-      const fakeScrollbar = document.querySelector('.fake-scrollbar');
-      const scrollContent = document.querySelector('.fake-scrollbar .scroll-content');
+      const fakeScrollbar = document.querySelector('.table-scroll-wrapper .fake-scrollbar');
+      const scrollContent = fakeScrollbar.querySelector('.scroll-content');
       const tableResp     = document.querySelector('.table-responsive');
       const mainTable     = document.getElementById('mainTable');
 
       if (!wrapper || !fakeScrollbar || !scrollContent || !tableResp || !mainTable) return;
 
-      // 1) Устанавливаем ширину «scroll-content» = полной ширине таблицы
       function syncScrollWidth() {
         const fullWidth = mainTable.scrollWidth;
         scrollContent.style.width = fullWidth + 'px';
@@ -164,13 +79,22 @@
       syncScrollWidth();
       window.addEventListener('resize', syncScrollWidth);
 
-      // 2) При прокрутке «фейкового» скроллбара — синхронизируем реальный
       fakeScrollbar.addEventListener('scroll', function() {
         tableResp.scrollLeft = fakeScrollbar.scrollLeft;
       });
-      // 3) При прокрутке реальной таблицы — двигаем «фейковый»
       tableResp.addEventListener('scroll', function() {
         fakeScrollbar.scrollLeft = tableResp.scrollLeft;
+      });
+
+      document.querySelectorAll('.toggle-group').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const groupNum = this.dataset.group;
+          const headers = document.querySelectorAll('th.group-' + groupNum);
+          const cells = document.querySelectorAll('td.group-' + groupNum);
+          const hidden = [...headers].every(h => h.classList.contains('hidden-group'));
+          headers.forEach(h => h.classList.toggle('hidden-group', !hidden));
+          cells.forEach(c => c.classList.toggle('hidden-group', !hidden));
+        });
       });
     });
   </script>
@@ -180,132 +104,103 @@
 <div class="container py-4">
   <h1>Табличный обзор: Компании и Статусы</h1>
 
-  <!-- Заголовок и кнопка "Добавить" -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="mb-0">{{ title }}</h1>
     <a href="{% url 'main:add_company' %}" class="btn btn-success">Добавить новую компанию</a>
   </div>
 
   <form method="get" class="row gx-2 gy-2 align-items-center mb-4">
-    <!-- Поиск -->
     <div class="col-12 col-md-6">
-      <input
-        type="text"
-        name="q"
-        value="{{ q }}"
-        class="form-control"
-        placeholder="Поиск по названию или БИН..."
-      >
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Поиск по названию или БИН...">
     </div>
-
-    <!-- Фильтр по региону -->
     <div class="col-auto">
       <select name="region" class="form-select">
         <option value="">Все регионы</option>
         {% for code,name in regions %}
-          <option value="{{ code }}"
-                  {% if code == current_region %}selected{% endif %}>
-            {{ name }}
-          </option>
+          <option value="{{ code }}" {% if code == current_region %}selected{% endif %}>{{ name }}</option>
         {% endfor %}
       </select>
     </div>
-
-    <!-- Только просроченные -->
     <div class="col-auto">
       <div class="form-check">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          name="overdue"
-          id="overdueCheck"
-          value="1"
-          {% if overdue_filter %}checked{% endif %}
-        >
-        <label class="form-check-label" for="overdueCheck">
-          Только просроченные
-        </label>
+        <input class="form-check-input" type="checkbox" name="overdue" id="overdueCheck" value="1" {% if overdue_filter %}checked{% endif %}>
+        <label class="form-check-label" for="overdueCheck">Только просроченные</label>
       </div>
     </div>
-
-    <!-- Кнопка Применить -->
     <div class="col-auto">
       <button type="submit" class="btn btn-primary">Применить</button>
     </div>
   </form>
 
+  <div class="group-toggle-buttons">
+    {% for group_name, group_statuses in grouped_statuses %}
+      <button type="button" class="btn btn-outline-secondary btn-sm toggle-group" data-group="{{ forloop.counter0 }}">
+        👁️ {{ group_name }}
+      </button>
+    {% endfor %}
+  </div>
 
-
-  <!--
-    ─── ОБЕРТКА СО «ФЕЙКОВОЙ» ПОЛОСОЙ ПРОКРУТКИ ───────────────────────
-    Сначала рисуем div.fake-scrollbar (его ширину задаст JS), а ниже — таблицу.
-  -->
   <div class="table-scroll-wrapper">
-    <!-- «Фейковая» область прокрутки: -->
-    <div class="fake-scrollbar">
-      <div class="scroll-content"></div>
-    </div>
-
-    <!-- Реальная прокручиваемая таблица: -->
+    <div class="fake-scrollbar"><div class="scroll-content"></div></div>
     <div class="table-responsive">
       <table class="table table-sm table-bordered align-middle mb-0" id="mainTable">
         <thead class="table-light">
           <tr>
-            <th class="sticky-col" scope="col">Компания</th>
-            {% for status in statuses %}
-              <th class="status-header" scope="col" title="{{ status.name }}">
-                {{ status.name }}
-              </th>
+            <th class="sticky-col" rowspan="2" scope="col">Компания</th>
+            {% for group_name, group_statuses in grouped_statuses %}
+              <th class="text-center group-{{ forloop.counter0 }}" colspan="{{ group_statuses|length }}">{{ group_name }}</th>
+            {% endfor %}
+          </tr>
+          <tr>
+            {% for group_name, group_statuses in grouped_statuses %}
+              {% for status in group_statuses %}
+                <th class="status-header group-{{ forloop.parentloop.counter0 }}" title="{{ status.name }}">{{ status.name }}</th>
+              {% endfor %}
             {% endfor %}
           </tr>
         </thead>
-          <tbody>
-            {% for company in companies %}
-              <tr>
-                <td class="sticky-col" style="vertical-align: middle; background-color: #fff;">
-                  <a href="{% url 'main:company_detail' company.pk %}">
-                    <strong>{{ company.name }}</strong>
-                  </a>
-                </td>
-
-                {% for status in statuses %}
+        <tbody>
+          {% for company in companies %}
+            <tr>
+              <td class="sticky-col" style="vertical-align: middle; background-color: #fff;">
+                <a href="{% url 'main:company_detail' company.pk %}"><strong>{{ company.name }}</strong></a>
+              </td>
+              {% for group_name, group_statuses in grouped_statuses %}
+                {% for status in group_statuses %}
                   {% if status.order < company.max_reached %}
-                    {# ПРОЙДЕННЫЙ ЭТАП #}
-                    <td class="text-center bg-success-light no-pad">
+                    <td class="text-center bg-success-light no-pad group-{{ forloop.parentloop.counter0 }}">
                       <a href="{% url 'main:attach_docs' company.pk status.pk %}">✓</a>
                     </td>
                   {% elif status.order == company.max_reached %}
-                    {# ТЕКУЩИЙ ЭТАП — проверяем сначала обжалование #}
                     {% if company.is_paused %}
-                      <td class="text-center bg-secondary text-white no-pad">
+                      <td class="text-center bg-secondary text-white no-pad group-{{ forloop.parentloop.counter0 }}">
                         <a href="{% url 'main:attach_docs' company.pk status.pk %}">⏸</a>
                       </td>
                     {% elif company.is_overdue %}
-                      <td class="text-center bg-danger text-white no-pad">
+                      <td class="text-center bg-danger text-white no-pad group-{{ forloop.parentloop.counter0 }}">
                         <a href="{% url 'main:attach_docs' company.pk status.pk %}">!</a>
                       </td>
                     {% else %}
-                      <td class="text-center bg-warning text-dark no-pad">
+                      <td class="text-center bg-warning text-dark no-pad group-{{ forloop.parentloop.counter0 }}">
                         <a href="{% url 'main:attach_docs' company.pk status.pk %}">→</a>
                       </td>
                     {% endif %}
                   {% else %}
-                    <td class="text-center no-pad">
+                    <td class="text-center no-pad group-{{ forloop.parentloop.counter0 }}">
                       <a href="{% url 'main:attach_docs' company.pk status.pk %}"></a>
                     </td>
                   {% endif %}
                 {% endfor %}
-              </tr>
-            {% empty %}
-              <tr>
-                <td colspan="{{ statuses|length|add:'1' }}" class="text-center">
-                  Нет компаний для отображения.
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
+              {% endfor %}
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="1000" class="text-center">Нет компаний для отображения.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
       </table>
-    </div> <!-- /.table-responsive -->
-  </div> <!-- /.table-scroll-wrapper -->
+    </div>
+  </div>
 </div>
 {% endblock %}

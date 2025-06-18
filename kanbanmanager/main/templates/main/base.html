@@ -34,6 +34,14 @@
 
       <div class="collapse navbar-collapse" id="navTabs">
         <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.resolver_match.url_name == 'main:company_dashboard' %}active{% endif %}"
+              href="{% url 'main:company_dashboard' %}"
+            >
+              📊 Дашборд
+            </a>
+          </li>
           {# Карточный список (index) #}
           <li class="nav-item">
             <a

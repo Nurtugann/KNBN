@@ -71,6 +71,8 @@ urlpatterns = [
     # Страницы профиля и регистрации
     path('profile/', views.profile, name='profile'),
     path('signup/', views.signup, name='signup'),
+
+    path("dashboard/", views.company_dashboard, name="company_dashboard"),
 ]
 
 # Поддержка статики и медиа в режиме DEBUG

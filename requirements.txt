@@ -7,3 +7,4 @@ psycopg2
 gunicorn
 pandas
 openpyxl
+boto3 django-storages
