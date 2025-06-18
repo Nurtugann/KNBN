@@ -40,7 +40,7 @@
     <div class="col-md-3">
       <div class="card bg-success text-white">
         <div class="card-title">Погашено</div>
-        <div class="display-6">{{ total_paid|floatformat:0 }} ₸</div>
+        <div class="display-6">{{ total_repaid|floatformat:0 }} ₸</div>
       </div>
     </div>
     <div class="col-md-3">
@@ -59,21 +59,29 @@
         <th>Компаний</th>
         <th>Общий долг</th>
         <th>Погашено</th>
+        <th>Погашено %</th>  {# 👈 добавляем колонку #}
       </tr>
     </thead>
     <tbody>
       {% for region in region_stats %}
       <tr>
-        <td>{{ region.name }}</td>
+        <td>{{ region.region }}</td>
         <td>{{ region.count }}</td>
         <td>{{ region.debt|floatformat:0 }} ₸</td>
         <td>{{ region.paid|floatformat:0 }} ₸</td>
+        <td>
+          {% if region.debt > 0 %}
+            {{ region.paid|divisibleby:region.debt|floatformat:2 }}%
+          {% else %}
+            —
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <h3 class="mt-4">⚖️ Статистика по судебным статусам</h3>
+  <h3 class="mt-4">⚖️ Статистика по статусам</h3>
   <table class="table table-bordered region-table">
     <thead class="table-light">
       <tr>
@@ -82,13 +90,14 @@
       </tr>
     </thead>
     <tbody>
-      {% for label, count in court_statuses.items %}
+      {% for s in status_stats %}
       <tr>
-        <td>{{ label }}</td>
-        <td>{{ count }}</td>
+        <td>{{ s.status__name }}</td>
+        <td>{{ s.count }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+
 </div>
 {% endblock %}

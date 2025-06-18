@@ -77,7 +77,7 @@ class Region(models.Model):
     def get_code_display(self):
         return dict(REGION_CHOICES).get(self.code, self.code)
 
-
+from datetime import timedelta
 # -------------------------------------------------------------------
 # Основные модели
 # -------------------------------------------------------------------
@@ -152,6 +152,15 @@ class Company(models.Model):
 
     def region_display(self):
         return dict(REGION_CHOICES).get(self.region, '—')
+    
+
+    @property
+    def days_left(self):
+        latest_status = self.history.order_by('-changed_at').first()
+        if not latest_status or not latest_status.status or latest_status.status.duration_days == 0:
+            return None
+        deadline = latest_status.changed_at.date() + timedelta(days=latest_status.status.duration_days)
+        return (deadline - timezone.now().date()).days
 
 
 class CompanyStatusHistory(models.Model):

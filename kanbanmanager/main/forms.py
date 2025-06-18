@@ -25,9 +25,11 @@ class CompanyForm(forms.ModelForm):
             'bin_number',
             'manager_name',
             'debt_amount',
+            'repaid_amount',  # ← добавь это
             'status',
             'region',
         ]
+
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -47,11 +49,17 @@ class CompanyForm(forms.ModelForm):
             }),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'region': forms.Select(attrs={'class': 'form-select'}),
+            'repaid_amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Сумма погашения (необязательно, формат 1234.56)'
+            }),
+
         }
         labels = {
             'bin_number': 'БИН',
             'manager_name': 'Управляющий',
             'debt_amount': 'Сумма долга',
+            'repayment_amount': 'Сумма погашения',
             'status': 'Текущий статус',
             'region': 'Регион',
         }
@@ -59,6 +67,8 @@ class CompanyForm(forms.ModelForm):
             'bin_number': 'Необязательное поле',
             'manager_name': 'Необязательное поле',
             'debt_amount': 'Необязательное поле',
+            'repayment_amount': 'Необязательное поле',
+
         }
 
     def __init__(self, *args, user=None, **kwargs):

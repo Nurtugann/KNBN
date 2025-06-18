@@ -54,9 +54,19 @@
     td.no-pad a {
       display: block;
       padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      text-align: center;
     }
     .hidden-group {
       display: none !important;
+    }
+    .legend-box {
+      display: inline-block;
+      width: 20px;
+      height: 16px;
+      margin-right: 6px;
+      border-radius: 3px;
     }
   </style>
 {% endblock %}
@@ -103,6 +113,16 @@
 {% block content %}
 <div class="container py-4">
   <h1>Табличный обзор: Компании и Статусы</h1>
+
+  <div class="mb-3">
+    <strong>Обозначения:</strong>
+    <div class="mt-2">
+      <span class="legend-box" style="background-color: #a1d99b;"></span> В пределах срока
+      <span class="legend-box" style="background-color: #f9c74f;"></span> Меньше 7 дней
+      <span class="legend-box" style="background-color: #ff6f61;"></span> Меньше 3 дней
+      <span class="legend-box" style="background-color: #dc3545;"></span> Просрочено
+    </div>
+  </div>
 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="mb-0">{{ title }}</h1>
@@ -176,13 +196,15 @@
                       <td class="text-center bg-secondary text-white no-pad group-{{ forloop.parentloop.counter0 }}">
                         <a href="{% url 'main:attach_docs' company.pk status.pk %}">⏸</a>
                       </td>
-                    {% elif company.is_overdue %}
-                      <td class="text-center bg-danger text-white no-pad group-{{ forloop.parentloop.counter0 }}">
-                        <a href="{% url 'main:attach_docs' company.pk status.pk %}">!</a>
-                      </td>
                     {% else %}
-                      <td class="text-center bg-warning text-dark no-pad group-{{ forloop.parentloop.counter0 }}">
-                        <a href="{% url 'main:attach_docs' company.pk status.pk %}">→</a>
+                      <td class="text-center text-white no-pad group-{{ forloop.parentloop.counter0 }}" style="background-color:
+                        {% if company.days_left <= 0 %}#dc3545
+                        {% elif company.days_left <= 3 %}#ff6f61
+                        {% elif company.days_left <= 7 %}#f9c74f
+                        {% else %}#a1d99b{% endif %};">
+                        <a href="{% url 'main:attach_docs' company.pk status.pk %}">
+                          {% if company.is_overdue %}!{% else %}→{% endif %} ({{ company.days_left }}д)
+                        </a>
                       </td>
                     {% endif %}
                   {% else %}

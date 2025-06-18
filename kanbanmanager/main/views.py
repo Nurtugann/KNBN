@@ -955,9 +955,10 @@ def company_dashboard(request):
         region_stats.append({
             "region": dict(REGION_CHOICES).get(r["region"], r["region"]),
             "count": r["count"],
-            "total_debt": r["total_debt"] or 0,
-            "total_repaid": r["total_repaid"] or 0,
+            "debt": r["total_debt"] or 0,
+            "paid": r["total_repaid"] or 0,
         })
+
 
     context = {
         "total_companies": companies.count(),
@@ -971,11 +972,8 @@ def company_dashboard(request):
         "status_stats": (
             companies
             .values("status__name")
-            .annotate(
-                count=Count("id"),
-                total_debt=Sum("debt_amount"),
-                total_repaid=Sum("repaid_amount")
-            )
+            .exclude(status__name__isnull=True)
+            .annotate(count=Count("id"))
             .order_by("status__name")
         ),
     }

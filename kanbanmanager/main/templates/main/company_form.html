@@ -38,6 +38,12 @@
     </div>
 
     <div class="mb-3">
+      <label for="{{ form.repaid_amount.id_for_label }}" class="form-label">Сумма погашения</label>
+      {{ form.repaid_amount }} <div class="form-text">Необязательно</div>
+      {{ form.repaid_amount.errors }}
+    </div>
+
+    <div class="mb-3">
       <label for="{{ form.region.id_for_label }}" class="form-label">Регион</label>
       {{ form.region }}
       {{ form.region.errors }}
