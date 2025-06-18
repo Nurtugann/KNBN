@@ -52,7 +52,6 @@ def count_workdays(start_dt, end_dt):
 def profile(request):
     user = request.user
 
-    # 1) Базовый queryset c учётом прав (staff vs не-staff)
     if user.is_staff:
         qs = Company.objects.all()
     else:
@@ -64,13 +63,12 @@ def profile(request):
     overdue_list = []
     almost_overdue_list = []
 
-    # 2) Проходим по всем компаниям и считаем необходимые показатели
     for c in qs:
         last_hist = c.history.first()
 
         c.days_in_status = None
         c.is_overdue = False
-        c.days_left = None
+        calculated_days_left = None  # ✅ теперь переменная локальная
 
         if last_hist and c.status and c.status.duration_days:
             passed = count_workdays(last_hist.changed_at, now)
@@ -82,14 +80,13 @@ def profile(request):
                 c.is_overdue = True
             else:
                 c.is_overdue = False
-                c.days_left = duration - passed
+                calculated_days_left = duration - passed
 
         if c.is_overdue:
             overdue_list.append(c)
-        elif c.days_left is not None and c.days_left <= 1:
+        elif calculated_days_left is not None and calculated_days_left <= 1:
             almost_overdue_list.append(c)
 
-    # 3) Статистика по статусам
     by_status = (
         qs.values('status__name')
           .annotate(count=Count('id'))
@@ -952,13 +949,23 @@ def company_dashboard(request):
     # Преобразование кодов регионов в названия
     region_stats = []
     for r in region_raw:
+        debt = r["total_debt"] or 0
+        paid = r["total_repaid"] or 0
         region_stats.append({
             "region": dict(REGION_CHOICES).get(r["region"], r["region"]),
             "count": r["count"],
-            "debt": r["total_debt"] or 0,
-            "paid": r["total_repaid"] or 0,
+            "debt": float(debt),
+            "paid": float(paid),
+            "remaining": float(debt - paid),
         })
-
+    
+    status_qs = (
+        companies
+        .values("status__name", "status__order")
+        .exclude(status__name__isnull=True)
+        .annotate(count=Count("id"))
+        .order_by("status__order")
+    )
 
     context = {
         "total_companies": companies.count(),
@@ -969,13 +976,15 @@ def company_dashboard(request):
             if c.debt_amount is not None and c.repaid_amount is not None and c.debt_amount > c.repaid_amount
         ),
         "region_stats": region_stats,
-        "status_stats": (
-            companies
-            .values("status__name")
-            .exclude(status__name__isnull=True)
-            .annotate(count=Count("id"))
-            .order_by("status__name")
-        ),
+        "status_stats": list(status_qs),  # 👈 преобразуем в list
+
     }
+
+    import json
+
+    # Преобразуем QuerySet в список словарей для JS
+    status_stats_raw = list(context["status_stats"])
+    context["status_chart_json"] = json.dumps(status_stats_raw)
+
 
     return render(request, "main/company_dashboard.html", context)

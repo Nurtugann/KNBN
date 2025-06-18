@@ -4,22 +4,16 @@
 {% block content %}
 <div class="container py-5">
 
-  <!-- Заголовок и кнопка "Добавить" -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="mb-0">{{ title }}</h1>
     <a href="{% url 'main:add_company' %}" class="btn btn-success">Добавить</a>
   </div>
 
-  <!-- Форма поиска и фильтры -->
   <form method="get" class="row g-2 mb-4 align-items-end">
     <div class="col-auto">
       <label class="form-label" for="id_q">Поиск</label>
-      <input type="text"
-             id="id_q"
-             name="q"
-             value="{{ request.GET.q|default_if_none:'' }}"
-             class="form-control"
-             placeholder="По названию…">
+      <input type="text" id="id_q" name="q" value="{{ request.GET.q|default_if_none:'' }}"
+             class="form-control" placeholder="По названию…">
     </div>
 
     <div class="col-auto">
@@ -27,8 +21,7 @@
       <select id="id_status" name="status" class="form-select">
         <option value="">Все</option>
         {% for st in statuses %}
-          <option value="{{ st.id }}"
-            {% if request.GET.status == st.id|stringformat:"s" %}selected{% endif %}>
+          <option value="{{ st.id }}" {% if request.GET.status == st.id|stringformat:"s" %}selected{% endif %}>
             {{ st.name }}
           </option>
         {% endfor %}
@@ -36,18 +29,17 @@
     </div>
 
     {% if user.is_staff %}
-      <div class="col-auto">
-        <label class="form-label" for="id_region">Регион</label>
-        <select id="id_region" name="region" class="form-select">
-          <option value="">Все</option>
-          {% for code,name in regions %}
-            <option value="{{ code }}"
-              {% if request.GET.region == code %}selected{% endif %}>
-              {{ name }}
-            </option>
-          {% endfor %}
-        </select>
-      </div>
+    <div class="col-auto">
+      <label class="form-label" for="id_region">Регион</label>
+      <select id="id_region" name="region" class="form-select">
+        <option value="">Все</option>
+        {% for code, name in regions %}
+          <option value="{{ code }}" {% if request.GET.region == code %}selected{% endif %}>
+            {{ name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
     {% endif %}
 
     <div class="col-auto">
@@ -55,12 +47,9 @@
     </div>
   </form>
 
-  <!-- Кнопка-переключатель "только просроченные" -->
   <div class="mb-3">
     {% if request.GET.overdue == '1' %}
-      <a href="{% url 'main:index' %}" class="btn btn-sm btn-outline-primary">
-        Показать все
-      </a>
+      <a href="{% url 'main:index' %}" class="btn btn-sm btn-outline-primary">Показать все</a>
     {% else %}
       <a href="{% url 'main:index' %}?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}
                                       {% if request.GET.status %}status={{ request.GET.status }}&{% endif %}
@@ -72,7 +61,6 @@
     {% endif %}
   </div>
 
-  <!-- Сам список -->
   <table class="table table-bordered table-hover align-middle">
     <thead class="table-light">
       <tr>
@@ -80,34 +68,36 @@
         <th>Статус</th>
         <th>Регион</th>
         <th>Дней в статусе</th>
+        <th>Управляющий</th>
+        <th>БИН</th>
+        <th>Долг</th>
+        <th>Погашено</th>
+        <th>Создано</th>
       </tr>
     </thead>
     <tbody>
       {% for c in companies %}
-        <tr {% if c.is_overdue %}class="table-danger"{% endif %}>
-          <td>
-            <a href="{% url 'main:company_detail' c.pk %}">{{ c.name }}</a>
-          </td>
-          <td>
-            {% if c.status %}
-              <span class="badge bg-info text-dark">{{ c.status.name }}</span>
-            {% else %}
-              <span class="text-muted">—</span>
-            {% endif %}
-          </td>
-          <td>{{ c.get_region_display }}</td>
-          <td>
-            {% if c.days_in_status is not None %}
-              {{ c.days_in_status }}
-            {% else %}
-              —
-            {% endif %}
-          </td>
-        </tr>
+      <tr {% if c.is_overdue %}class="table-danger"{% endif %}>
+        <td><a href="{% url 'main:company_detail' c.pk %}">{{ c.name }}</a></td>
+        <td>
+          {% if c.status %}
+            <span class="badge bg-info text-dark">{{ c.status.name }}</span>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td>{{ c.get_region_display }}</td>
+        <td>{% if c.days_in_status is not None %}{{ c.days_in_status }}{% else %}—{% endif %}</td>
+        <td>{{ c.manager|default:"—" }}</td>
+        <td>{{ c.bin_number|default:"—" }}</td>
+        <td>{% if c.debt_amount %}{{ c.debt_amount|floatformat:0 }} ₸{% else %}—{% endif %}</td>
+        <td>{% if c.repaid_amount %}{{ c.repaid_amount|floatformat:0 }} ₸{% else %}—{% endif %}</td>
+        <td>{{ c.created_at|date:"d.m.Y" }}</td>
+      </tr>
       {% empty %}
-        <tr>
-          <td colspan="4" class="text-center text-muted">Компании не найдены</td>
-        </tr>
+      <tr>
+        <td colspan="9" class="text-center text-muted">Компании не найдены</td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>

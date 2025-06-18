@@ -21,10 +21,10 @@ urlpatterns = [
     # ─── Регистрация ─────────────────────────────────────────────────────────
     # Только для /accounts/signup/ → main_views.signup
     path('accounts/signup/', main_views.signup, name='signup'),
-
+    path('', main_views.company_dashboard, name='dashboard'),
     # ─── Основное приложение “main” ──────────────────────────────────────────
     # Все остальные маршруты (index, company/<pk>/, board/, и т. д.)
-    path('', include(('main.urls', 'main'), namespace='main')),
+    path('main/', include(('main.urls', 'main'), namespace='main')),
 ]
 
 if settings.DEBUG:
