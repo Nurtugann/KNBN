@@ -926,65 +926,97 @@ from django.db.models import Sum, Count
 from django.shortcuts import render
 from .models import Company, REGION_CHOICES
 
+from django.db.models import Count
+import json
+
+from django.db.models import Sum, Count
+from django.http import JsonResponse
+import json
+from decimal import Decimal
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super().default(obj)
+
 @login_required
 def company_dashboard(request):
+    # Получаем данные о компаниях
     if request.user.is_staff:
         companies = Company.objects.all()
     else:
         user_regions = request.user.profile.regions.values_list('code', flat=True)
         companies = Company.objects.filter(region__in=user_regions)
 
-    # Группировка по коду региона
-    region_raw = (
-        companies
-        .values("region")
-        .annotate(
-            count=Count("id"),
-            total_debt=Sum("debt_amount"),
-            total_repaid=Sum("repaid_amount")
-        )
-        .order_by("region")
-    )
-
-    # Преобразование кодов регионов в названия
-    region_stats = []
-    for r in region_raw:
-        debt = r["total_debt"] or 0
-        paid = r["total_repaid"] or 0
-        region_stats.append({
-            "region": dict(REGION_CHOICES).get(r["region"], r["region"]),
-            "count": r["count"],
-            "debt": float(debt),
-            "paid": float(paid),
-            "remaining": float(debt - paid),
-        })
+    # Основные KPI
+    total_companies = companies.count()
+    total_debt = companies.aggregate(Sum('debt_amount'))['debt_amount__sum'] or 0
+    total_repaid = companies.aggregate(Sum('repaid_amount'))['repaid_amount__sum'] or 0
+    remaining_debt = total_debt - total_repaid
     
-    status_qs = (
-        companies
-        .values("status__name", "status__order")
-        .exclude(status__name__isnull=True)
-        .annotate(count=Count("id"))
-        .order_by("status__order")
+    # Проценты для KPI
+    debt_percentage = 100  # 100% от общего (самого себя)
+    repayment_percentage = (total_repaid / total_debt * 100) if total_debt > 0 else 0
+    remaining_percentage = 100 - repayment_percentage
+
+    # Региональная статистика
+    region_stats = []
+    region_labels = []
+    region_remaining = []
+    region_paid = []
+    
+    for code, name in REGION_CHOICES:
+        region_companies = companies.filter(region=code)
+        count = region_companies.count()
+        debt = region_companies.aggregate(Sum('debt_amount'))['debt_amount__sum'] or 0
+        paid = region_companies.aggregate(Sum('repaid_amount'))['repaid_amount__sum'] or 0
+        remaining = debt - paid
+        paid_ratio = (paid / debt * 100) if debt > 0 else 100
+        
+        region_stats.append({
+            'region': name,
+            'count': count,
+            'debt': debt,
+            'paid': paid,
+            'remaining': remaining,
+            'paid_ratio': paid_ratio
+        })
+        
+        if count > 0:  # Добавляем только регионы с компаниями
+            region_labels.append(name)
+            region_remaining.append(float(remaining))
+            region_paid.append(float(paid))
+
+    # Статистика по статусам
+    status_stats = list(
+        companies.values('status__name')
+        .annotate(count=Count('id'))
+        .order_by('status__name')
     )
+    
+    status_labels = [s['status__name'] or 'Без статуса' for s in status_stats]
+    status_counts = [s['count'] for s in status_stats]
 
     context = {
-        "total_companies": companies.count(),
-        "total_debt": companies.aggregate(Sum("debt_amount"))["debt_amount__sum"] or 0,
-        "total_repaid": companies.aggregate(Sum("repaid_amount"))["repaid_amount__sum"] or 0,
-        "overdue_count": sum(
-            1 for c in companies
-            if c.debt_amount is not None and c.repaid_amount is not None and c.debt_amount > c.repaid_amount
-        ),
-        "region_stats": region_stats,
-        "status_stats": list(status_qs),  # 👈 преобразуем в list
-
+        # KPI данные
+        'total_companies': total_companies,
+        'total_debt': total_debt,
+        'total_repaid': total_repaid,
+        'remaining_debt': remaining_debt,
+        'debt_percentage': round(debt_percentage, 1),
+        'repayment_percentage': round(repayment_percentage, 1),
+        'remaining_percentage': round(remaining_percentage, 1),
+        
+        # Данные для таблицы регионов
+        'region_stats': region_stats,
+        
+        # Данные для графиков (JSON)
+        'status_labels': json.dumps(status_labels, cls=DecimalEncoder),
+        'status_counts': json.dumps(status_counts, cls=DecimalEncoder),
+        'region_labels': json.dumps(region_labels, cls=DecimalEncoder),
+        'region_remaining': json.dumps(region_remaining, cls=DecimalEncoder),
+        'region_paid': json.dumps(region_paid, cls=DecimalEncoder),
     }
-
-    import json
-
-    # Преобразуем QuerySet в список словарей для JS
-    status_stats_raw = list(context["status_stats"])
-    context["status_chart_json"] = json.dumps(status_stats_raw)
-
-
-    return render(request, "main/company_dashboard.html", context)
+    
+    return render(request, 'main/company_dashboard.html', context)

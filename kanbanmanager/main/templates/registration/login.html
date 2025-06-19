@@ -1,29 +1,125 @@
-{% extends 'main/base.html' %}
+{% extends 'main/auth_base.html' %}
 
-{% block title %}Вход{% endblock %}
+{% block title %}Вход в систему{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --color-primary: #4e73df;
+    --color-secondary: #858796;
+    --color-light: #f8f9fc;
+    --color-dark: #5a5c69;
+  }
+
+  .login-container {
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    padding: 3rem;
+    margin: 5rem auto;
+    max-width: 420px;
+    position: relative;
+    overflow: hidden;
+    border-top: 5px solid #4e73df;
+  }
+
+  .login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    padding-bottom: 1rem;
+  }
+
+  .login-header::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #4e73df, #224abe);
+  }
+
+  .form-control {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+  }
+
+  .login-btn {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+  }
+
+  .login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+  }
+
+  .form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .alert-danger {
+    border-radius: 8px;
+  }
+
+  @media (max-width: 576px) {
+    .login-container {
+      padding: 2rem;
+      margin: 2rem auto;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5" style="max-width: 380px;">
-  <h1 class="h3 mb-4 text-center">Пожалуйста, войдите</h1>
-  <form method="post" class="needs-validation" novalidate>
+<div class="login-container">
+  <div class="login-header">
+    <h2 class="h4 mb-3">Добро пожаловать</h2>
+    <p class="text-muted">Пожалуйста, войдите в систему</p>
+  </div>
+
+  <form method="post" novalidate>
     {% csrf_token %}
-    <div class="mb-3">
-      <label for="id_username" class="form-label">Имя пользователя</label>
-      <input type="text" name="username" autofocus required
-             class="form-control" id="id_username">
+    <div class="mb-4">
+      <label for="id_username" class="form-label">
+        <i class="fas fa-user me-2"></i>Имя пользователя
+      </label>
+      <input type="text" name="username" id="id_username" 
+             class="form-control form-control-lg" 
+             autofocus required>
     </div>
-    <div class="mb-3">
-      <label for="id_password" class="form-label">Пароль</label>
-      <input type="password" name="password" required
-             class="form-control" id="id_password">
+
+    <div class="mb-4">
+      <label for="id_password" class="form-label">
+        <i class="fas fa-lock me-2"></i>Пароль
+      </label>
+      <input type="password" name="password" id="id_password"
+             class="form-control form-control-lg" required>
     </div>
+
     {% if form.errors %}
-      <div class="alert alert-danger">
-        Неверное имя пользователя или пароль.
-      </div>
+    <div class="alert alert-danger mb-4">
+      <i class="fas fa-exclamation-circle me-2"></i>
+      Неверное имя пользователя или пароль
+    </div>
     {% endif %}
-    <button class="w-100 btn btn-lg btn-primary" type="submit">
-      Войти
+
+    <button type="submit" class="btn btn-primary w-100 login-btn">
+      <i class="fas fa-sign-in-alt me-2"></i>Войти
     </button>
   </form>
 </div>

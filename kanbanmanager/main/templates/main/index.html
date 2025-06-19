@@ -4,222 +4,596 @@
 {% block extra_css %}
   <style>
     :root {
-      --primary: #4E73DF;
-      --primary-dark: #224ABE;
-      --success: #1CC88A;
-      --info:    #36B9CC;
-      --warning: #F6C23E;
-      --danger:  #E74A3B;
-      --light:   #F8F9FC;
-      --dark:    #5A5C69;
-      --gray:    #858796;
-      --radius:  0.75rem;
-      --transition: 0.3s ease;
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --primary-dark: #3a0ca3;
+      --secondary: #7209b7;
+      --success: #4cc9f0;
+      --info: #4895ef;
+      --warning: #f8961e;
+      --danger: #f72585;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray-100: #f8f9fa;
+      --gray-200: #e9ecef;
+      --gray-300: #dee2e6;
+      --gray-400: #ced4da;
+      --gray-500: #adb5bd;
+      --gray-600: #6c757d;
+      --gray-700: #495057;
+      --gray-800: #343a40;
+      --gray-900: #212529;
+      --radius: 12px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    @font-face {
+      font-family: 'Inter';
+      src: url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    }
+
     body {
-      background-color: var(--light);
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f5f7fa;
+      color: var(--gray-800);
+      line-height: 1.6;
     }
+
+    /* Гладкий скролл */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Анимации */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* Основной контейнер */
+    .dashboard-container {
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Шапка */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      animation: fadeIn 0.6s ease-out;
+    }
+
     .page-header h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
       color: var(--dark);
-      font-size: 2rem;
-      font-weight: 600;
+      margin: 0;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
     }
+
+    /* Кнопка добавления */
     .btn-add {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: #fff;
-      padding: 0.6rem 1.2rem;
+      border: none;
       border-radius: var(--radius);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transition: transform var(--transition), box-shadow var(--transition);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
     }
+
+    .btn-add::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+      opacity: 0;
+      transition: var(--transition);
+      z-index: -1;
+    }
+
     .btn-add:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      box-shadow: var(--shadow-md);
+      color: white;
     }
+
+    .btn-add:hover::before {
+      opacity: 1;
+    }
+
+    .btn-add i {
+      margin-right: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    /* Карточка фильтров */
     .filter-card {
-      background: #fff;
+      background: white;
       border-radius: var(--radius);
-      padding: 1.5rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-      margin-bottom: 2rem;
+      padding: 1.75rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      animation: fadeIn 0.6s ease-out 0.1s both;
     }
+
+    .filter-card:hover {
+      box-shadow: var(--shadow);
+    }
+
+    .filter-card label {
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--gray-300);
+      transition: var(--transition);
+    }
+
+    .filter-card .form-control:focus,
+    .filter-card .form-select:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    }
+
+    .filter-card .input-group-text {
+      background-color: white;
+      border-right: none;
+    }
+
+    .filter-card .btn-primary {
+      padding: 0.75rem;
+      font-weight: 600;
+      background-color: var(--primary);
+      border: none;
+      transition: var(--transition);
+    }
+
+    .filter-card .btn-primary:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    /* Карточки компаний */
+    .companies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.75rem;
+    }
+
     .company-card {
-      background: #fff;
+      background: white;
       border-radius: var(--radius);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-      transition: transform var(--transition), box-shadow var(--transition);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      animation: fadeIn 0.6s ease-out;
+      position: relative;
+      border: 1px solid rgba(0, 0, 0, 0.03);
     }
+
+    .company-card:nth-child(1) { animation-delay: 0.1s; }
+    .company-card:nth-child(2) { animation-delay: 0.15s; }
+    .company-card:nth-child(3) { animation-delay: 0.2s; }
+    .company-card:nth-child(4) { animation-delay: 0.25s; }
+    .company-card:nth-child(5) { animation-delay: 0.3s; }
+    .company-card:nth-child(6) { animation-delay: 0.35s; }
+
     .company-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(67, 97, 238, 0.2);
     }
+
     .company-card .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--primary);
-      color: #fff;
-      padding: 1rem;
-      font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
     }
+
+    .company-card .card-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.05),
+        transparent
+      );
+      transform: rotate(30deg);
+    }
+
     .company-card .card-header a {
-      color: #fff;
+      color: white;
       text-decoration: none;
       font-weight: 600;
+      font-size: 1.1rem;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: calc(100% - 80px);
+      max-width: calc(100% - 100px);
+      position: relative;
+      z-index: 1;
     }
+
     .company-card .badge-status {
-      font-size: 0.75rem;
-      padding: 0.3rem 0.6rem;
+      font-size: 0.7rem;
+      padding: 0.35rem 0.7rem;
       border-radius: 50px;
       text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      background-color: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      color: white;
+      position: relative;
+      z-index: 1;
     }
+
     .company-card .card-body {
-      padding: 1rem 1.5rem;
+      padding: 1.5rem;
       flex-grow: 1;
     }
+
     .company-card .info-list {
       list-style: none;
       padding: 0;
       margin: 0;
     }
+
     .company-card .info-list li {
       display: flex;
       justify-content: space-between;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #eaeaea;
-      font-size: 0.9rem;
-      color: var(--dark);
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 0.95rem;
     }
-    .company-card .info-list li:last-child { border-bottom: none; }
-    .company-card .info-list strong { color: var(--gray); }
+
+    .company-card .info-list li:last-child {
+      border-bottom: none;
+    }
+
+    .company-card .info-list strong {
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+
     .company-card .card-footer {
-      background: var(--light);
-      padding: 0.75rem 1.5rem;
+      background: var(--gray-100);
+      padding: 1rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 0.85rem;
-      color: var(--gray);
     }
+
+    .company-card .card-footer .date {
+      color: var(--gray-600);
+    }
+
+    .company-card .card-footer .amounts {
+      text-align: right;
+    }
+
     .company-card .card-footer .amount {
       font-weight: 600;
-      color: var(--dark);
+      display: block;
+      line-height: 1.4;
     }
-    .company-card .card-footer .debt { color: var(--danger); }
-    .company-card .card-footer .repaid { color: var(--success); }
+
+    .company-card .card-footer .debt {
+      color: var(--danger);
+    }
+
+    .company-card .card-footer .repaid {
+      color: var(--success);
+    }
+
+    /* Пустое состояние */
     .empty-state {
-      background: #fff;
+      background: white;
       border-radius: var(--radius);
       text-align: center;
-      padding: 3rem 1.5rem;
+      padding: 3rem 2rem;
       grid-column: 1 / -1;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      box-shadow: var(--shadow-sm);
+      animation: fadeIn 0.6s ease-out;
     }
+
     .empty-state i {
-      font-size: 3rem;
-      color: var(--gray);
-      margin-bottom: 1rem;
+      font-size: 3.5rem;
+      color: var(--gray-400);
+      margin-bottom: 1.5rem;
+      opacity: 0.7;
     }
-    .empty-state h4 { color: var(--dark); margin-bottom: 0.5rem; }
-    .empty-state p  { color: var(--gray); margin-bottom: 1rem; }
+
+    .empty-state h4 {
+      color: var(--dark);
+      margin-bottom: 0.75rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .empty-state p {
+      color: var(--gray-600);
+      margin-bottom: 1.5rem;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 1200px) {
+      .companies-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .dashboard-container {
+        padding: 1.5rem 1rem;
+      }
+
+      .filter-card {
+        padding: 1.25rem;
+      }
+
+      .company-card .card-body {
+        padding: 1.25rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .companies-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page-header h1 {
+        font-size: 1.75rem;
+      }
+
+      .btn-add {
+        width: 100%;
+      }
+    }
+
+    /* Микро-интеракции */
+    .hover-scale {
+      transition: transform 0.2s ease;
+    }
+
+    .hover-scale:hover {
+      transform: scale(1.02);
+    }
+
+    /* Кастомный скролл */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--gray-100);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-dark);
+    }
   </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4 py-lg-5">
-  <div class="page-header d-flex flex-wrap justify-content-between align-items-center mb-4">
-    <h1 class="mb-2 mb-md-0">{{ title }}</h1>
-    <a href="{% url 'main:add_company' %}" class="btn-add">
+<div class="dashboard-container">
+  <div class="page-header">
+    <h1>{{ title }}</h1>
+    <a href="{% url 'main:add_company' %}" class="btn-add hover-scale">
       <i class="bi bi-plus-lg"></i> Добавить компанию
     </a>
   </div>
 
-  <div class="filter-card">
-    <form method="get" class="row gx-3 gy-2 align-items-end">
-      <div class="col-sm-6 col-md-4">
-        <label for="id_q" class="form-label">Поиск</label>
+  <div class="filter-card hover-scale">
+    <form method="get" class="row gx-3 gy-3 align-items-end">
+      <div class="col-12 col-md-6 col-lg-3">
+        <label for="id_q">Поиск компании</label>
         <div class="input-group">
-          <span class="input-group-text bg-white"><i class="bi bi-search text-gray"></i></span>
-          <input type="text" id="id_q" name="q" class="form-control" value="{{ request.GET.q|default_if_none:'' }}" placeholder="Название или БИН">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" id="id_q" name="q" class="form-control" 
+                 value="{{ request.GET.q|default_if_none:'' }}" 
+                 placeholder="Название или БИН">
         </div>
       </div>
-      <div class="col-sm-6 col-md-4">
-        <label for="id_status" class="form-label">Статус</label>
+      <div class="col-12 col-md-6 col-lg-3">
+        <label for="id_status">Статус</label>
         <select id="id_status" name="status" class="form-select">
-          <option value="">Все</option>
+          <option value="">Все статусы</option>
           {% for st in statuses %}
-            <option value="{{ st.id }}" {% if request.GET.status == st.id|stringformat:"s" %}selected{% endif %}>{{ st.name }}</option>
+            <option value="{{ st.id }}" {% if request.GET.status == st.id|stringformat:"s" %}selected{% endif %}>
+              {{ st.name }}
+            </option>
           {% endfor %}
         </select>
       </div>
       {% if user.is_staff %}
-      <div class="col-sm-6 col-md-4">
-        <label for="id_region" class="form-label">Регион</label>
+      <div class="col-12 col-md-6 col-lg-3">
+        <label for="id_region">Регион</label>
         <select id="id_region" name="region" class="form-select">
-          <option value="">Все</option>
+          <option value="">Все регионы</option>
           {% for code,name in regions %}
-            <option value="{{ code }}" {% if request.GET.region == code %}selected{% endif %}>{{ name }}</option>
+            <option value="{{ code }}" {% if request.GET.region == code %}selected{% endif %}>
+              {{ name }}
+            </option>
           {% endfor %}
         </select>
       </div>
       {% endif %}
-      <div class="col-sm-6 col-md-4">
-        <button type="submit" class="btn btn-primary w-100">
-          <i class="bi bi-filter me-2"></i> Фильтровать
+      <div class="col-12 col-md-6 col-lg-3 d-flex">
+        <button type="submit" class="btn btn-primary w-100 hover-scale">
+          <i class="bi bi-funnel me-2"></i> Применить
         </button>
+        <a href="?" class="btn btn-outline-secondary ms-2 hover-scale">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </a>
       </div>
     </form>
   </div>
 
-  <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+  {% if companies %}
+  <div class="companies-grid">
     {% for c in companies %}
-    <div class="col">
-      <div class="company-card h-100">
-        <div class="card-header">
-          <a href="{% url 'main:company_detail' c.pk %}">{{ c.name|truncatechars:30 }}</a>
-          {% if c.status %}
-            <span class="badge-status badge-status-{{ c.status.color|default:'primary' }}">{{ c.status.name }}</span>
-          {% else %}
-            <span class="badge-status badge-status-default">—</span>
-          {% endif %}
+    <div class="company-card">
+      <div class="card-header">
+        <a href="{% url 'main:company_detail' c.pk %}">{{ c.name }}</a>
+        {% if c.status %}
+          <span class="badge-status">{{ c.status.name }}</span>
+        {% else %}
+          <span class="badge-status">Без статуса</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <ul class="info-list">
+          <li>
+            <strong>Регион:</strong>
+            <span>{{ c.get_region_display|default:'—' }}</span>
+          </li>
+          <li>
+            <strong>Управляющий:</strong>
+            <span>{{ c.manager_name|default:'—' }}</span>
+          </li>
+          <li>
+            <strong>БИН:</strong>
+            <span>{{ c.bin_number|default:'—' }}</span>
+          </li>
+          <li>
+            <strong>Дней в статусе:</strong>
+            <span>
+              {% if c.days_in_status is not None %}
+                {{ c.days_in_status }} дн.
+                {% if c.is_overdue %}
+                  <span class="badge bg-danger ms-2">Просрочено</span>
+                {% endif %}
+              {% else %}
+                —
+              {% endif %}
+            </span>
+          </li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <div class="date">
+          <small>Создано</small><br>
+          {{ c.created_at|date:"d.m.Y" }}
         </div>
-        <div class="card-body">
-          <ul class="info-list">
-            <li><strong>Регион:</strong><span>{{ c.get_region_display|default:'—' }}</span></li>
-            <li><strong>Управляющий:</strong><span>{{ c.manager_name|default:'—' }}</span></li>
-            <li><strong>БИН:</strong><span>{{ c.bin_number|default:'—' }}</span></li>
-            <li><strong>Дней в статусе:</strong><span>{% if c.days_in_status is not None %}{{ c.days_in_status }} дн.{% else %}—{% endif %}</span></li>
-          </ul>
-        </div>
-        <div class="card-footer">
-          <div>
-            <small>Создано</small><br>
-            {{ c.created_at|date:"d.m.Y" }}
-          </div>
-          <div class="text-end">
-            <div><small>Долг:</small> <span class="amount debt">{{ c.debt_amount|default_if_none:'0'|floatformat:0 }} ₸</span></div>
-            <div><small>Погашено:</small> <span class="amount repaid">{{ c.repaid_amount|default_if_none:'0'|floatformat:0 }} ₸</span></div>
-          </div>
+        <div class="amounts">
+          <small>Долг:</small>
+          <span class="amount debt">{{ c.debt_amount|default_if_none:0|floatformat:0 }} ₸</span><br>
+          <small>Погашено:</small>
+          <span class="amount repaid">{{ c.repaid_amount|default_if_none:0|floatformat:0 }} ₸</span>
         </div>
       </div>
     </div>
-    {% empty %}
-    <div class="empty-state">
-      <i class="bi bi-inbox"></i>
-      <h4>Компании не найдены</h4>
-      <p>Измените фильтры или добавьте новую компанию.</p>
-      <a href="?" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-counterclockwise"></i> Сбросить</a>
-      <a href="{% url 'main:add_company' %}" class="btn-add"><i class="bi bi-plus-lg"></i> Добавить компанию</a>
-    </div>
     {% endfor %}
   </div>
+  {% else %}
+  <div class="empty-state hover-scale">
+    <i class="bi bi-building"></i>
+    <h4>Компании не найдены</h4>
+    <p>Попробуйте изменить параметры фильтрации или добавьте новую компанию</p>
+    <div class="d-flex justify-content-center gap-2">
+      <a href="?" class="btn btn-outline-secondary hover-scale">
+        <i class="bi bi-arrow-counterclockwise me-2"></i> Сбросить фильтры
+      </a>
+      <a href="{% url 'main:add_company' %}" class="btn-add hover-scale">
+        <i class="bi bi-plus-lg me-2"></i> Добавить компанию
+      </a>
+    </div>
+  </div>
+  {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    // Микро-интеракции для улучшения UX
+    document.querySelectorAll('.company-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        // Не переходить по ссылке, если кликнули на другие элементы
+        if (!e.target.closest('a') && !e.target.closest('button')) {
+          const link = card.querySelector('.card-header a');
+          if (link) {
+            window.location.href = link.href;
+          }
+        }
+      });
+    });
+
+    // Анимация при наведении на карточки
+    document.querySelectorAll('.hover-scale').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        el.style.transform = 'scale(1.02)';
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = '';
+      });
+    });
+  </script>
 {% endblock %}
