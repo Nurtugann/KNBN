@@ -1,8 +1,10 @@
 {% extends 'main/base.html' %}
-{% block title %}Дашборд: Общая статистика по компаниям{% endblock %}
+{% block title %}Дашборд: Компании по регионам{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
+  #kazakhstan-map { width: 100%; height: 500px; margin-bottom: 2rem; }
   .card {
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     border-radius: 10px;
@@ -22,104 +24,109 @@
 
 {% block content %}
 <div class="container py-4">
-  <h1 class="mb-4">📊 Общая статистика по компаниям</h1>
+  <h1 class="mb-4">📍 Компании по регионам Казахстана</h1>
 
-  <div class="row">
+  <!-- Интерактивная карта -->
+  <div id="kazakhstan-map" style="width:100%;height:400px;margin-bottom:2rem;"></div>
+
+  <!-- Общие итоги -->
+  <div class="row mb-4">
     <div class="col-md-3">
       <div class="card bg-light">
-        <div class="card-title">Общее количество компаний</div>
-        <div class="display-6">{{ total_companies }}</div>
+        <div class="card-title">Всего компаний</div>
+        <div class="display-6" id="totalCompanies">{{ total_companies }}</div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card bg-warning">
         <div class="card-title">Суммарный долг</div>
-        <div class="display-6">{{ total_debt|floatformat:0 }} ₸</div>
+        <div class="display-6" id="totalDebt">{{ total_debt|floatformat:0 }} ₸</div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card bg-success text-white">
         <div class="card-title">Погашено</div>
-        <div class="display-6">{{ total_repaid|floatformat:0 }} ₸</div>
+        <div class="display-6" id="totalRepaid">{{ total_repaid|floatformat:0 }} ₸</div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card bg-danger text-white">
         <div class="card-title">Просрочено</div>
-        <div class="display-6">{{ overdue_count }}</div>
+        <div class="display-6" id="overdueCount">{{ overdue_count }}</div>
       </div>
     </div>
   </div>
 
-  <h3 class="mt-4">📍 Статистика по регионам</h3>
-  <table class="table table-bordered region-table">
-    <thead class="table-light">
-      <tr>
-        <th>Регион</th>
-        <th>Компаний</th>
-        <th>Общий долг</th>
-        <th>Погашено</th>
-        <th>Погашено %</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for region in region_stats %}
-      <tr>
-        <td>{{ region.region }}</td>
-        <td>{{ region.count }}</td>
-        <td>{{ region.debt|floatformat:0 }} ₸</td>
-        <td>{{ region.paid|floatformat:0 }} ₸</td>
-        <td>
-          {% if region.debt > 0 %}
-            {{ region.paid|divisibleby:region.debt|floatformat:2 }}%
-          {% else %}
-            —
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <!-- Карточки по регионам -->
+  <h4 class="mt-4">📊 Статистика по регионам</h4>
+  <div class="row g-3">
+    {% for region in region_stats %}
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <div class="card h-100">
+          <div class="card-header text-center fw-bold">
+            {{ region.region }}
+          </div>
+          <div class="card-body p-2">
+            <ul class="list-unstyled mb-0">
+              <li>🏢 <strong>Компаний:</strong> {{ region.count }}</li>
+              <li>💰 <strong>Долг:</strong> {{ region.debt|floatformat:0 }} ₸</li>
+              <li>✅ <strong>Погашено:</strong> {{ region.paid|floatformat:0 }} ₸</li>
+              <li>📊 <strong>Погашено %:</strong>
+                {% if region.debt > 0 %}
+                  {{ region.paid|divisibleby:region.debt|floatformat:2 }}%
+                {% else %}
+                  —
+                {% endif %}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 
-  <h3 class="mt-4">⚖️ Статистика по статусам</h3>
-  <table class="table table-bordered region-table">
-    <thead class="table-light">
-      <tr>
-        <th>Статус</th>
-        <th>Компаний</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for s in status_stats %}
-      <tr>
-        <td>{{ s.status__name }}</td>
-        <td>{{ s.count }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <!-- JSON-данные -->
-  {{ region_stats|json_script:"region-data" }}
-  {{ status_stats|json_script:"status-data" }}
-
-  <h3 class="mt-5">📈 График по регионам</h3>
-  <div id="regionBarChart" style="width:100%; max-width:800px; height:400px; margin:auto;"></div>
-
-  <h3 class="mt-5">📊 График по статусам</h3>
-  <div id="statusBarChart" style="width:100%; max-width:800px; height:400px; margin:auto;"></div>
-
-  <h4 class="mt-5">📊 График по регионам (долги и остатки)</h4>
-  <div id="regionDebtChart" style="width:100%; max-width:900px; height:400px; margin:auto;"></div>
+  <!-- Графики -->
+  <div id="regionBarChart" style="height:400px;" class="mt-5"></div>
+  <div id="statusBarChart" style="height:400px;" class="mt-5"></div>
 </div>
+
+<!-- JSON-данные для JS -->
+{{ region_stats|json_script:"region-data" }}
+{{ status_stats|json_script:"status-data" }}
 {% endblock %}
 
+
 {% block extra_js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
   const regionData = JSON.parse(document.getElementById("region-data").textContent);
   const statusData = JSON.parse(document.getElementById("status-data").textContent);
 
+  // 1. Инициализация карты
+  const map = L.map('kazakhstan-map').setView([48.0, 66.9], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  // 2. Стиль и действия на регионах
+  function style(feature) {
+    return { fillColor: '#add8e6', weight: 1, color: '#555', fillOpacity: 0.7 };
+  }
+
+  function onEachFeature(feature, layer) {
+    layer.on({
+      click: () => updateRegionCharts(feature.properties.name),
+      mouseover: () => layer.setStyle({ fillOpacity: 1 }),
+      mouseout: () => layer.setStyle({ fillOpacity: 0.7 })
+    });
+  }
+
+  fetch('/static/geo/gadm41_KAZ_1.json')
+    .then(res => res.json())
+    .then(data => L.geoJSON(data, { style, onEachFeature }).addTo(map));
+
+  // 3. Начальные графики
   const regionLabels = regionData.map(r => r.region);
   const regionCounts = regionData.map(r => r.count);
 
@@ -130,15 +137,13 @@
     marker: { color: 'rgba(0, 123, 255, 0.7)' }
   }], {
     title: "Количество компаний по регионам",
-    xaxis: { title: "Регион", automargin: true },
-    yaxis: { title: "Компаний" },
-    margin: { b: 100 }
+    xaxis: { title: "Регион" },
+    yaxis: { title: "Компаний" }
   });
 
-  const sortedStatusData = statusData.slice().sort((a, b) => a["status__order"] - b["status__order"]);
-  const statusLabels = sortedStatusData.map(s => s["status__name"]);
-  const statusCounts = sortedStatusData.map(s => s["count"]);
-
+  const sortedStatus = statusData.slice().sort((a, b) => a.status__order - b.status__order);
+  const statusLabels = sortedStatus.map(s => s.status__name);
+  const statusCounts = sortedStatus.map(s => s.count);
 
   Plotly.newPlot("statusBarChart", [{
     x: statusLabels,
@@ -146,38 +151,46 @@
     type: 'bar',
     marker: { color: 'rgba(40, 167, 69, 0.7)' }
   }], {
-    title: "Количество компаний по статусам",
+    title: "Компании по статусам",
     xaxis: { title: "Статус", automargin: true },
-    yaxis: {
-      title: "Компаний",
-      dtick: 1  // 👈 вот это добавь
-    },
-    margin: { b: 100 }
+    yaxis: { title: "Компаний", dtick: 1 }
   });
 
+  // 4. При клике на регион
+  function updateRegionCharts(regionName) {
+    const region = regionData.find(r => r.region === regionName);
+    if (!region) return;
 
-  const regionDebts = regionData.map(r => r.debt);
-  const regionRemaining = regionData.map(r => r.debt - r.paid);
+    document.getElementById("totalCompanies").innerText = region.count;
+    document.getElementById("totalDebt").innerText = Math.round(region.debt).toLocaleString() + " ₸";
+    document.getElementById("totalRepaid").innerText = Math.round(region.paid).toLocaleString() + " ₸";
+    document.getElementById("overdueCount").innerText = ""; // Здесь можно логикой рассчитать
 
-  Plotly.newPlot("regionDebtChart", [
-    {
-      x: regionLabels,
-      y: regionDebts,
-      name: "Долг",
-      type: "bar"
-    },
-    {
-      x: regionLabels,
-      y: regionRemaining,
-      name: "Остаток",
-      type: "bar"
-    }
-  ], {
-    barmode: "group",
-    title: "Суммарный долг и остаток по регионам",
-    xaxis: { title: "Регион", automargin: true },
-    yaxis: { title: "Сумма (₸)" },
-    margin: { b: 100 }
-  });
+    Plotly.react("regionBarChart", [{
+      x: [regionName],
+      y: [region.count],
+      type: 'bar',
+      marker: { color: 'rgba(0, 123, 255, 0.7)' }
+    }], {
+      title: `Количество компаний в регионе: ${regionName}`,
+      xaxis: { title: "Регион" },
+      yaxis: { title: "Компаний", dtick: 1 }
+    });
+
+    const regionStatus = statusData.filter(s => s.region === regionName);
+    const labels = regionStatus.map(s => s.status__name);
+    const counts = regionStatus.map(s => s.count);
+
+    Plotly.react("statusBarChart", [{
+      x: labels,
+      y: counts,
+      type: 'bar',
+      marker: { color: 'rgba(40, 167, 69, 0.7)' }
+    }], {
+      title: `Статусы компаний в регионе: ${regionName}`,
+      xaxis: { title: "Статус", automargin: true },
+      yaxis: { title: "Компаний", dtick: 1 }
+    });
+  }
 </script>
 {% endblock %}

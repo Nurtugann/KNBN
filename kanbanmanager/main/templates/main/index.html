@@ -1,105 +1,116 @@
 {% extends 'main/base.html' %}
 {% block title %}{{ title }}{% endblock %}
 
+{% block extra_css %}
+<style>
+  .company-card {
+    transition: transform .2s, box-shadow .2s;
+  }
+  .company-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .company-card .card-header {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  .company-card .badge-status {
+    font-size: 0.8rem;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
 
+  <!-- Заголовок и кнопка -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="mb-0">{{ title }}</h1>
-    <a href="{% url 'main:add_company' %}" class="btn btn-success">Добавить</a>
+    <a href="{% url 'main:add_company' %}" class="btn btn-success">
+      <i class="bi bi-plus-lg"></i> Добавить компанию
+    </a>
   </div>
 
+  <!-- Фильтры -->
   <form method="get" class="row g-2 mb-4 align-items-end">
-    <div class="col-auto">
-      <label class="form-label" for="id_q">Поиск</label>
-      <input type="text" id="id_q" name="q" value="{{ request.GET.q|default_if_none:'' }}"
-             class="form-control" placeholder="По названию…">
+    <div class="col-sm-6 col-md-3">
+      <label for="id_q" class="form-label">Поиск</label>
+      <input type="text" id="id_q" name="q" class="form-control"
+             value="{{ request.GET.q|default_if_none:'' }}" placeholder="Название…">
     </div>
-
-    <div class="col-auto">
-      <label class="form-label" for="id_status">Статус</label>
+    <div class="col-sm-6 col-md-3">
+      <label for="id_status" class="form-label">Статус</label>
       <select id="id_status" name="status" class="form-select">
         <option value="">Все</option>
         {% for st in statuses %}
-          <option value="{{ st.id }}" {% if request.GET.status == st.id|stringformat:"s" %}selected{% endif %}>
+          <option value="{{ st.id }}"
+            {% if request.GET.status == st.id|stringformat:"s" %}selected{% endif %}>
             {{ st.name }}
           </option>
         {% endfor %}
       </select>
     </div>
-
     {% if user.is_staff %}
-    <div class="col-auto">
-      <label class="form-label" for="id_region">Регион</label>
+    <div class="col-sm-6 col-md-3">
+      <label for="id_region" class="form-label">Регион</label>
       <select id="id_region" name="region" class="form-select">
         <option value="">Все</option>
-        {% for code, name in regions %}
-          <option value="{{ code }}" {% if request.GET.region == code %}selected{% endif %}>
+        {% for code,name in regions %}
+          <option value="{{ code }}"
+            {% if request.GET.region == code %}selected{% endif %}>
             {{ name }}
           </option>
         {% endfor %}
       </select>
     </div>
     {% endif %}
-
-    <div class="col-auto">
-      <button type="submit" class="btn btn-primary">Применить</button>
+    <div class="col-sm-6 col-md-3 d-grid">
+      <button type="submit" class="btn btn-primary mt-4">Применить</button>
     </div>
   </form>
 
-  <div class="mb-3">
-    {% if request.GET.overdue == '1' %}
-      <a href="{% url 'main:index' %}" class="btn btn-sm btn-outline-primary">Показать все</a>
-    {% else %}
-      <a href="{% url 'main:index' %}?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}
-                                      {% if request.GET.status %}status={{ request.GET.status }}&{% endif %}
-                                      {% if request.GET.region %}region={{ request.GET.region }}&{% endif %}
-                                      overdue=1"
-         class="btn btn-sm btn-outline-danger">
-        Показать просроченные
-      </a>
-    {% endif %}
+  <!-- Список карт -->
+  <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+    {% for c in companies %}
+    <div class="col">
+      <div class="card company-card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <a href="{% url 'main:company_detail' c.pk %}" class="stretched-link text-decoration-none text-dark">
+            {{ c.name }}
+          </a>
+          {% if c.status %}
+            <span class="badge badge-status bg-info text-dark">{{ c.status.name }}</span>
+          {% else %}
+            <span class="badge badge-status bg-secondary">—</span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <li><strong>Регион:</strong> {{ c.get_region_display }}</li>
+            <li><strong>Управляющий:</strong> {{ c.manager_name|default:"—" }}</li>
+            <li><strong>БИН:</strong> {{ c.bin_number|default:"—" }}</li>
+            <li><strong>Дней в статусе:</strong>
+              {% if c.days_in_status is not None %}{{ c.days_in_status }}{% else %}—{% endif %}
+            </li>
+          </ul>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">Создано {{ c.created_at|date:"d.m.Y" }}</small>
+          </div>
+          <div class="text-end">
+            <div><small>Долг:</small> {{ c.debt_amount|default_if_none:"—"|floatformat:0 }} ₸</div>
+            <div><small>Погашено:</small> {{ c.repaid_amount|default_if_none:"—"|floatformat:0 }} ₸</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col">
+      <div class="alert alert-info text-center mb-0">Компании не найдены</div>
+    </div>
+    {% endfor %}
   </div>
 
-  <table class="table table-bordered table-hover align-middle">
-    <thead class="table-light">
-      <tr>
-        <th>Название</th>
-        <th>Статус</th>
-        <th>Регион</th>
-        <th>Дней в статусе</th>
-        <th>Управляющий</th>
-        <th>БИН</th>
-        <th>Долг</th>
-        <th>Погашено</th>
-        <th>Создано</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for c in companies %}
-      <tr {% if c.is_overdue %}class="table-danger"{% endif %}>
-        <td><a href="{% url 'main:company_detail' c.pk %}">{{ c.name }}</a></td>
-        <td>
-          {% if c.status %}
-            <span class="badge bg-info text-dark">{{ c.status.name }}</span>
-          {% else %}
-            <span class="text-muted">—</span>
-          {% endif %}
-        </td>
-        <td>{{ c.get_region_display }}</td>
-        <td>{% if c.days_in_status is not None %}{{ c.days_in_status }}{% else %}—{% endif %}</td>
-        <td>{{ c.manager|default:"—" }}</td>
-        <td>{{ c.bin_number|default:"—" }}</td>
-        <td>{% if c.debt_amount %}{{ c.debt_amount|floatformat:0 }} ₸{% else %}—{% endif %}</td>
-        <td>{% if c.repaid_amount %}{{ c.repaid_amount|floatformat:0 }} ₸{% else %}—{% endif %}</td>
-        <td>{{ c.created_at|date:"d.m.Y" }}</td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="9" class="text-center text-muted">Компании не найдены</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
 </div>
 {% endblock %}
