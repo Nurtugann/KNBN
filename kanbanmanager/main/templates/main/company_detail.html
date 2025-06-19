@@ -5,391 +5,716 @@
 
 {% block extra_css %}
   <style>
-    /* ─── Заголовок компании ─────────────────────────────────────────────────── */
-    .company-header.card {
-      background: #fff;
-      border-radius: .75rem;
-      width: calc(100% + 4rem);
-      margin: 0 -1rem 1.5rem;
-      padding: 1rem 1.5rem;
-      box-shadow: 0 .125rem .25rem rgba(0,0,0,0.075);
+    :root {
+      --primary-color: #4361ee;
+      --success-color: #2ecc71;
+      --warning-color: #f39c12;
+      --danger-color: #e74c3c;
+      --info-color: #3498db;
+      --light-color: #f8f9fa;
+      --dark-color: #343a40;
+      --border-radius: 0.5rem;
+      --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --transition: all 0.3s ease;
     }
-    .company-header .company-name {
-      font-size: 2rem;
-      font-weight: 700;
-      margin: 0;
-      line-height: 1.2;
-      color: #222;
+    
+    /* ─── Основной контейнер ──────────────────────────────────────────────── */
+    .company-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
     }
-    .company-header .company-meta {
-      margin-top: .5rem;
+    
+    /* ─── Заголовок компании ──────────────────────────────────────────────── */
+    .company-header {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--box-shadow);
+      position: relative;
+    }
+    
+    .company-title {
       display: flex;
-      flex-wrap: wrap;         /* разрешаем перенос бейджей на новую строку */
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .company-name {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--dark-color);
+      margin: 0;
+      line-height: 1.3;
+    }
+    
+    .company-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
       align-items: center;
-      gap: .5rem;
+      margin-top: 0.75rem;
     }
-    .company-header .company-meta .badge,
-    .company-header .company-meta small {
-      font-size: .9rem;
-      padding: .4em .6em;
-      white-space: normal;     /* текст внутри бейджа может переноситься */
-      word-break: break-word;  /* длинные слова переносятся по частям */
-      max-width: 100%;
+    
+    .company-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.5rem 0.8rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
     }
-    /* Ограничиваем ширину жёлтого бейджа и обрезаем многоточием */
-    .company-header .company-meta .badge.bg-warning {
-      max-width: 60ch;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    
+    .badge-primary { background: var(--primary-color); color: white; }
+    .badge-success { background: var(--success-color); color: white; }
+    .badge-warning { background: var(--warning-color); color: white; }
+    .badge-danger  { background: var(--danger-color);  color: white; }
+    .badge-info    { background: var(--info-color);    color: white; }
+    .badge-light   { background: var(--light-color);   color: var(--dark-color); }
+    
+    .company-actions {
+      display: flex;
+      gap: 0.5rem;
     }
-
-    /* ─── Список этапов ─────────────────────────────────────────────────────── */
-    .statuses-list {
+    
+    /* ─── Блок статусов ────────────────────────────────────────────────────── */
+    .status-section {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--box-shadow);
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--dark-color);
+      margin: 0;
+    }
+    
+    .status-list {
       list-style: none;
       padding: 0;
       margin: 0;
-    }
-    .statuses-list li {
-      margin-bottom: 0.75rem;
-    }
-    .status-item {
       display: flex;
       flex-direction: column;
-      padding: 0.75rem 1rem;
-      border: 1px solid #e2e5ed;
-      border-radius: 0.5rem;
-      background-color: #fff;
-      transition: transform .2s, box-shadow .2s;
+      gap: 0.75rem;
     }
+    
+    .status-item {
+      padding: 1.25rem;
+      border-radius: var(--border-radius);
+      border-left: 4px solid transparent;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: var(--transition);
+      position: relative;
+    }
+    
     .status-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
     }
-    .status-item.passed   { border-left: .25rem solid #138f3f; background: #d4edda; color: #0c4e1e; }
-    .status-item.current  { border-left: .25rem solid #856404; background: #fff3cd; color: #856404; }
-    .status-item.paused   { border-left: .25rem solid #ced4da; background: #f8f9fa; color: #6c757d; }
-
-    .status-date,
-    .expected-end {
-      font-size: .85rem;
+    
+    .status-item.current {
+      border-left-color: var(--warning-color);
+      background: rgba(243, 156, 18, 0.08);
+    }
+    
+    .status-item.passed {
+      border-left-color: var(--success-color);
+      background: rgba(46, 204, 113, 0.08);
+    }
+    
+    .status-item.paused {
+      border-left-color: var(--danger-color);
+      background: rgba(231, 76, 60, 0.08);
+    }
+    
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+    
+    .status-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--dark-color);
+      margin: 0;
+    }
+    
+    .status-dates {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      margin-top: 0.5rem;
+    }
+    
+    .status-date {
+      font-size: 0.85rem;
       color: #6c757d;
-      margin-top: .25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
     }
-    .expected-end {
-      color: #0c5460;
+    
+    .status-date i {
+      font-size: 0.9em;
     }
-
-    .badge-pdf {
-      font-size: .85rem;
-      min-width: 3rem;
-      text-align: center;
+    
+    .status-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
     }
-    .btn-pdf,
-    .btn-pause {
-      font-size: .85rem;
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
     }
-
-    .stage-comment-list {
+    
+    .btn-sm {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+    
+    .btn-primary {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-success {
+      background: var(--success-color);
+      border-color: var(--success-color);
+    }
+    
+    .btn-warning {
+      background: var(--warning-color);
+      border-color: var(--warning-color);
+    }
+    
+    .btn-danger {
+      background: var(--danger-color);
+      border-color: var(--danger-color);
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+      background: transparent;
+    }
+    
+    .btn-outline-primary:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+    
+    /* ─── Комментарии к этапу ─────────────────────────────────────────────── */
+    .status-comments {
+      margin-top: 1rem;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      padding-top: 1rem;
+    }
+    
+    .comment-list {
       list-style: none;
       padding: 0;
-      margin-top: .5rem;
-      max-height: 120px;
+      margin: 0 0 1rem 0;
+      max-height: 150px;
       overflow-y: auto;
     }
-    .stage-comment-list li {
-      background: #f5f5f5;
-      border-radius: 3px;
-      margin-bottom: .25rem;
-      padding: .4rem .6rem;
+    
+    .comment-item {
+      background: rgba(0,0,0,0.03);
+      border-radius: 0.4rem;
+      padding: 0.7rem;
+      margin-bottom: 0.5rem;
     }
-
-    .full-history {
-      margin-top: 2rem;
-      padding-top: 1rem;
-      border-top: 1px solid #dee2e6;
+    
+    .comment-meta {
+      font-size: 0.75rem;
+      color: #6c757d;
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
     }
+    
+    .comment-text {
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    
+    .comment-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .comment-input {
+      flex: 1;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #dee2e6;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      transition: var(--transition);
+    }
+    
+    .comment-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    /* ─── История статусов ─────────────────────────────────────────────────── */
+    .history-section {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--box-shadow);
+    }
+    
+    .history-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0 0 0;
+    }
+    
     .history-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: .5rem;
-      background: #fafafa;
-      border-radius: 4px;
-      margin-bottom: .5rem;
-      position: relative;
+      padding: 1rem;
+      background: rgba(0,0,0,0.02);
+      border-radius: var(--border-radius);
+      margin-bottom: 0.5rem;
+      transition: var(--transition);
     }
-    .history-datetime {
-      font-size: .85rem;
+    
+    .history-item:hover {
+      background: rgba(0,0,0,0.05);
+    }
+    
+    .history-info {
+      flex: 1;
+    }
+    
+    .history-date {
+      font-size: 0.8rem;
       color: #6c757d;
-      margin-bottom: .25rem;
+      margin-bottom: 0.2rem;
     }
+    
     .history-status {
-      font-weight: 600;
-      color: #495057;
+      font-weight: 500;
+      color: var(--dark-color);
     }
+    
+    .history-status.paused {
+      color: var(--danger-color);
+    }
+    
     .history-actions {
-      position: absolute;
-      top: .5rem;
-      right: .5rem;
+      display: flex;
+      gap: 0.3rem;
+    }
+    
+    .action-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: #6c757d;
+      transition: var(--transition);
+    }
+    
+    .action-btn:hover {
+      background: rgba(0,0,0,0.1);
+      color: var(--dark-color);
+    }
+    
+    .action-btn.edit {
+      color: var(--primary-color);
+    }
+    
+    .action-btn.delete {
+      color: var(--danger-color);
+    }
+    
+    /* ─── Адаптивность ─────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .company-title {
+        flex-direction: column;
+      }
+      
+      .company-actions {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+      }
+      
+      .status-header {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .status-actions {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 {% endblock %}
 
-
 {% block content %}
-<div class="container py-4" style="max-width: 900px;">
-
-  {# Header #}
-  <div class="company-header card">
-    <div class="d-flex justify-content-between align-items-start">
+<div class="company-container">
+  <!-- Шапка компании -->
+  <div class="company-header">
+    <div class="company-title">
       <div>
         <h1 class="company-name">{{ company.name }}</h1>
         <div class="company-meta">
-          <span class="badge bg-info text-dark">
-            <i class="bi bi-geo-alt-fill"></i>&nbsp;{{ company.get_region_display }}
+          <span class="company-badge badge-primary">
+            <i class="bi bi-geo-alt-fill"></i>
+            {{ company.get_region_display }}
           </span>
+          
           {% if company.status %}
-            <span class="badge bg-warning text-dark">
-              <i class="bi bi-gear-fill"></i>&nbsp;{{ company.status.name }}
+            <span class="company-badge badge-warning">
+              <i class="bi bi-gear-fill"></i>
+              {{ company.status.name }}
             </span>
-          {% if company.status.duration_days > 0 %}
-            <small class="text-muted ms-2">рек.: {{ company.status.duration_days }} дн.</small>
-          {% endif %}
+            
+            {% if company.status.duration_days > 0 %}
+              <span class="company-badge badge-light">
+                <i class="bi bi-clock-history"></i>
+                Рекомендуемый срок: {{ company.status.duration_days }} дн.
+              </span>
+            {% endif %}
           {% else %}
-            <span class="badge bg-secondary">Без статуса</span>
+            <span class="company-badge badge-light">
+              <i class="bi bi-exclamation-circle"></i>
+              Без статуса
+            </span>
           {% endif %}
+          
           {% if days_in_status is not None %}
-            <small class="text-muted">Уже {{ days_in_status }} раб. д.</small>
+            <span class="company-badge badge-light">
+              <i class="bi bi-calendar-check"></i>
+              В статусе: {{ days_in_status }} раб. дн.
+            </span>
           {% endif %}
         </div>
       </div>
-      <a href="{% url 'main:edit_company' company.pk %}" class="btn btn-outline-primary btn-sm">
-        Редактировать
-      </a>
+      
+      <div class="company-actions">
+        <a href="{% url 'main:edit_company' company.pk %}" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-pencil"></i> Редактировать
+        </a>
+        <button onclick="history.back()" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left"></i> Назад
+        </button>
+      </div>
     </div>
   </div>
 
-  <hr class="my-4">
-
-
-  {# Toggle statuses #}
-  <div class="d-flex justify-content-between align-items-center mb-2">
-    <h4 class="mb-0">Статусы (этапы)</h4>
-    <button id="toggleStatusesBtn" class="btn btn-sm btn-outline-secondary">
-      Свернуть этапы
-    </button>
-  </div>
-
-  <div id="statusesContainer">
-    <ul class="statuses-list">
+  <!-- Блок статусов -->
+  <div class="status-section">
+    <div class="section-header">
+      <h2 class="section-title">Этапы работы</h2>
+      <button id="toggleStatusesBtn" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrows-collapse"></i> Свернуть все
+      </button>
+    </div>
+    
+    <ul class="status-list" id="statusesContainer">
       {% for item in status_info %}
         {% with st=item.status hist=item.hist %}
-        <li class="status-item
+        <li class="status-item 
                    {% if st.id == company.status_id %}
                      {% if hist.is_paused %}paused{% else %}current{% endif %}
                    {% elif hist %}passed{% endif %}">
-          <div>
-            <div class="fw-semibold">{{ st.name }}</div>
-            {% if hist %}
-              <div class="status-date">
-                Начало: {{ hist.changed_at|date:"Y-m-d H:i" }} — {{ item.days }} раб. д.
-              </div>
-              {% if st.duration_days > 0 and item.expected_end %}
-                <div class="expected-end">
-                  Ожидаемый конец: {{ item.expected_end|date:"Y-m-d H:i" }}
-                </div>
-              {% endif %}
-            {% endif %}
-          </div>
-
-          <div class="mt-2 d-flex flex-wrap gap-2">
-            <a href="{% url 'main:attach_docs' company.pk st.pk %}"
-               class="btn btn-outline-secondary btn-pdf btn-sm">
-              PDF ({{ item.docs_count }})
-            </a>
-            {% if st.id == company.status_id and hist %}
-              <button
-                type="button"
-                class="btn btn-objection btn-sm {% if hist.is_paused %}btn-danger{% else %}btn-outline-danger{% endif %}"
-                data-toggle-url="{% url 'main:toggle_objection' company.pk hist.id %}">
-                {% if hist.is_paused %}Завершить обжалование{% else %}Обжалование{% endif %}
-              </button>
-            {% endif %}
-            {# рядом с текущим статусом #}
+          <div class="status-header">
+            <h3 class="status-name">
+              <i class="bi 
+                {% if st.id == company.status_id %}
+                  {% if hist.is_paused %}bi-pause-circle{% else %}bi-arrow-right-circle{% endif %}
+                {% elif hist %}bi-check-circle{% else %}bi-circle{% endif %}"></i>
+              {{ st.name }}
+            </h3>
+            
             {% if st.id == company.status_id and next_status %}
-              <form class="move-company-form d-inline" method="post" action="{% url 'main:move_company' %}">
+              <form class="move-company-form" method="post" action="{% url 'main:move_company' %}">
                 {% csrf_token %}
                 <input type="hidden" name="company_id" value="{{ company.pk }}">
-                <input type="hidden" name="status_id"  value="{{ next_status.pk }}">
-                <button class="btn btn-success btn-sm">
-                  Перейти к следующему этапу: {{ next_status.name }}
+                <input type="hidden" name="status_id" value="{{ next_status.pk }}">
+                <button type="submit" class="btn btn-success btn-sm">
+                  <i class="bi bi-arrow-right"></i> {{ next_status.name }}
                 </button>
               </form>
             {% endif %}
-
           </div>
-
-          <ul class="stage-comment-list mt-3">
-            {% for com in item.stage_comments %}
-              <li>
-                <small class="text-muted">{{ com.author.username }}, {{ com.created_at|date:"Y-m-d H:i" }}</small>
-                <div>{{ com.text }}</div>
-              </li>
-            {% empty %}
-              <li class="text-muted">Нет комментариев к этому этапу</li>
-            {% endfor %}
-          </ul>
-
-          <form method="post"
-                action="{% url 'main:add_status_comment' company.pk st.pk %}"
-                class="stage-comment-form mt-2">
-            {% csrf_token %}
-            {{ item.stage_comment_form.text }}
-            <button class="btn btn-outline-secondary btn-pdf btn-sm" type="submit">
-              Оставить комментарий
-            </button>
-          </form>
+          
+          {% if hist %}
+            <div class="status-dates">
+              <div class="status-date">
+                <i class="bi bi-calendar-plus"></i>
+                Начало: {{ hist.changed_at|date:"Y-m-d H:i" }}
+              </div>
+              <div class="status-date">
+                <i class="bi bi-clock"></i>
+                В работе: {{ item.days }} раб. дн.
+              </div>
+              {% if st.duration_days > 0 and item.expected_end %}
+                <div class="status-date text-success">
+                  <i class="bi bi-calendar-check"></i>
+                  Ожидаемое завершение: {{ item.expected_end|date:"Y-m-d H:i" }}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+          
+          <div class="status-actions">
+            <a href="{% url 'main:attach_docs' company.pk st.pk %}" 
+               class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-file-earmark-pdf"></i> Документы ({{ item.docs_count }})
+            </a>
+            
+            {% if st.id == company.status_id and hist %}
+              <button type="button" 
+                      class="btn {% if hist.is_paused %}btn-danger{% else %}btn-outline-danger{% endif %} btn-sm"
+                      data-toggle-url="{% url 'main:toggle_objection' company.pk hist.id %}">
+                <i class="bi bi-exclamation-octagon"></i>
+                {% if hist.is_paused %}Завершить обжалование{% else %}Обжалование{% endif %}
+              </button>
+            {% endif %}
+          </div>
+          
+          <!-- Комментарии к этапу -->
+          <div class="status-comments">
+            <ul class="comment-list">
+              {% for com in item.stage_comments %}
+                <li class="comment-item">
+                  <div class="comment-meta">
+                    <span><i class="bi bi-person"></i> {{ com.author.username }}</span>
+                    <span><i class="bi bi-clock"></i> {{ com.created_at|date:"Y-m-d H:i" }}</span>
+                  </div>
+                  <div class="comment-text">{{ com.text }}</div>
+                </li>
+              {% empty %}
+                <li class="comment-item text-muted">
+                  <i class="bi bi-chat-left"></i> Нет комментариев к этому этапу
+                </li>
+              {% endfor %}
+            </ul>
+            
+            <form method="post" 
+                  action="{% url 'main:add_status_comment' company.pk st.pk %}"
+                  class="comment-form">
+              {% csrf_token %}
+              <input type="text" 
+                     name="text" 
+                     class="comment-input" 
+                     placeholder="Добавить комментарий..." 
+                     required>
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-send"></i>
+              </button>
+            </form>
+          </div>
         </li>
         {% endwith %}
       {% endfor %}
     </ul>
   </div>
 
-  {# Full history #}
-  <div class="full-history" id="full-history">
-    <h4>История смены статусов</h4>
-    {% for h in full_history %}
-      {# добавляем data-history-id и класс delete-history-form на форму #}
-      <div class="history-item" data-history-id="{{ h.id }}">
-        <div>
-          <div class="history-datetime">{{ h.changed_at|date:"Y-m-d H:i" }}</div>
-          <div class="history-status">
-            Этап: {{ h.status.name|default:"Без статуса" }}
-            {% if h.is_paused %}<em class="text-muted">(на паузе)</em>{% endif %}
+  <!-- История изменений -->
+  <div class="history-section">
+    <h2 class="section-title">История изменений</h2>
+    
+    <ul class="history-list">
+      {% for h in full_history %}
+        <li class="history-item" data-history-id="{{ h.id }}">
+          <div class="history-info">
+            <div class="history-date">
+              <i class="bi bi-clock"></i> {{ h.changed_at|date:"Y-m-d H:i" }}
+            </div>
+            <div class="history-status {% if h.is_paused %}paused{% endif %}">
+              <i class="bi 
+                {% if h.is_paused %}bi-pause-circle
+                {% elif h.status %}bi-check-circle
+                {% else %}bi-dash-circle{% endif %}"></i>
+              Этап: {{ h.status.name|default:"Без статуса" }}
+              {% if h.is_paused %}(на паузе){% endif %}
+            </div>
           </div>
-        </div>
-        {% if request.user.is_staff %}
-          <div class="history-actions">
-            <a href="{% url 'main:edit_status_history' h.id %}"
-              class="btn btn-outline-secondary btn-sm">✎</a>
-            <form method="post"
-                  action="{% url 'main:delete_status_history' h.id %}"
-                  class="delete-history-form d-inline">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-outline-danger btn-sm">🗑</button>
-            </form>
-          </div>
-        {% endif %}
-      </div>
-    {% empty %}
-      <p class="text-muted">Ещё нет записей истории.</p>
-    {% endfor %}
+          
+          {% if request.user.is_staff %}
+            <div class="history-actions">
+              <a href="{% url 'main:edit_status_history' h.id %}" 
+                 class="action-btn edit"
+                 title="Редактировать">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <form method="post" 
+                    action="{% url 'main:delete_status_history' h.id %}"
+                    class="delete-history-form">
+                {% csrf_token %}
+                <button type="submit" class="action-btn delete" title="Удалить">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </div>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="text-muted">
+          <i class="bi bi-info-circle"></i> Нет записей в истории
+        </li>
+      {% endfor %}
+    </ul>
   </div>
-
-
-  <button onclick="history.back()" class="btn btn-secondary mt-4">
-    ← Назад
-  </button>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
-  // 1) Переключатель видимости списка этапов
-  const toggleBtn = document.getElementById('toggleStatusesBtn'),
-        statuses  = document.getElementById('statusesContainer');
+  // Переключатель видимости списка этапов
+  const toggleBtn = document.getElementById('toggleStatusesBtn');
+  const statuses = document.getElementById('statusesContainer');
+  
   if (toggleBtn && statuses) {
     toggleBtn.addEventListener('click', () => {
-      const hidden = statuses.style.display === 'none';
-      statuses.style.display = hidden ? '' : 'none';
-      toggleBtn.textContent = hidden ? 'Свернуть этапы' : 'Показать этапы';
+      const isHidden = statuses.style.display === 'none';
+      statuses.style.display = isHidden ? '' : 'none';
+      toggleBtn.innerHTML = isHidden 
+        ? '<i class="bi bi-arrows-collapse"></i> Свернуть все' 
+        : '<i class="bi bi-arrows-expand"></i> Развернуть все';
     });
   }
 
-  // 2) AJAX-перевод на следующий этап для любой формы .move-company-form
-  document.querySelectorAll('form.move-company-form').forEach(form => {
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      document.querySelectorAll('.ajax-notice').forEach(n => n.remove());
-      const csrftoken = document.querySelector('meta[name="csrf-token"]').content;
-      try {
-        const res = await fetch(form.action, {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'X-CSRFToken': csrftoken,
-            'Accept':      'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: new FormData(form)
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const ct = res.headers.get('Content-Type') || '';
-        if (!ct.includes('application/json')) {
-          const html = await res.text();
-          throw new Error(`Неверный Content-Type: ${ct}`);
-        }
-        const data = await res.json();
-        if (data.result !== 'ok') throw new Error(data.message || 'Неожиданный ответ от сервера');
-
-        // Успех: заменяем форму на уведомление
-        const notice = document.createElement('div');
-        notice.className = 'alert alert-success ajax-notice mt-3';
-        notice.textContent = 'Перешли на следующий этап';
-        form.replaceWith(notice);
-
-      } catch (err) {
-        console.error(err);
-        const fail = document.createElement('div');
-        fail.className = 'alert alert-danger ajax-notice mt-3';
-        fail.textContent = 'Не удалось перейти: ' + err.message;
-        form.after(fail);
+  // Обработка AJAX-форм
+  const handleFormSubmit = async (form, successCallback) => {
+    const formData = new FormData(form);
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      });
+      
+      if (!response.ok) throw new Error('Ошибка сети');
+      
+      const data = await response.json();
+      if (data.result !== 'ok') throw new Error(data.message || 'Ошибка сервера');
+      
+      if (typeof successCallback === 'function') {
+        successCallback(form, data);
       }
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert('Произошла ошибка: ' + error.message);
+    }
+  };
+
+  // Переход на следующий этап
+  document.querySelectorAll('.move-company-form').forEach(form => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await handleFormSubmit(form, () => {
+        // Создаем уведомление об успехе
+        const notice = document.createElement('div');
+        notice.className = 'alert alert-success';
+        notice.innerHTML = `
+          <i class="bi bi-check-circle"></i> 
+          Компания успешно переведена на следующий этап
+        `;
+        form.parentNode.insertBefore(notice, form);
+        setTimeout(() => notice.remove(), 3000);
+      });
     });
   });
 
-  // 3) AJAX-удаление записи истории для любой формы .delete-history-form
-  document.querySelectorAll('form.delete-history-form').forEach(form => {
-    form.addEventListener('submit', async e => {
+  // Удаление записи истории
+  document.querySelectorAll('.delete-history-form').forEach(form => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      document.querySelectorAll('.ajax-notice').forEach(n => n.remove());
-      const csrftoken = document.querySelector('meta[name="csrf-token"]').content;
+      if (!confirm('Вы уверены, что хотите удалить эту запись?')) return;
+      
+      await handleFormSubmit(form, (form, data) => {
+        const historyItem = form.closest('.history-item');
+        historyItem.style.opacity = '0';
+        setTimeout(() => historyItem.remove(), 300);
+      });
+    });
+  });
+
+  // Переключение обжалования
+  document.querySelectorAll('[data-toggle-url]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const url = button.getAttribute('data-toggle-url');
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      
       try {
-        const res = await fetch(form.action, {
+        const response = await fetch(url, {
           method: 'POST',
-          credentials: 'same-origin',
           headers: {
             'X-CSRFToken': csrftoken,
-            'Accept':      'application/json',
             'X-Requested-With': 'XMLHttpRequest'
           }
         });
-        const ct = res.headers.get('Content-Type') || '';
-        if (!res.ok || !ct.includes('application/json')) {
-          const text = await res.text();
-          throw new Error(`HTTP ${res.status}: ${text}`);
+        
+        if (!response.ok) throw new Error('Ошибка сети');
+        
+        const data = await response.json();
+        if (data.result !== 'ok') throw new Error(data.message || 'Ошибка сервера');
+        
+        // Обновляем кнопку
+        if (data.is_paused) {
+          button.classList.remove('btn-outline-danger');
+          button.classList.add('btn-danger');
+          button.innerHTML = '<i class="bi bi-exclamation-octagon"></i> Завершить обжалование';
+        } else {
+          button.classList.remove('btn-danger');
+          button.classList.add('btn-outline-danger');
+          button.innerHTML = '<i class="bi bi-exclamation-octagon"></i> Обжалование';
         }
-        const data = await res.json();
-        if (data.result !== 'ok') throw new Error(data.message || 'Ошибка на сервере');
-
-        // Удаляем запись из DOM
-        const item = form.closest('.history-item');
-        item.remove();
-
-      } catch (err) {
-        console.error(err);
-        const fail = document.createElement('div');
-        fail.className = 'alert alert-danger ajax-notice mt-2';
-        fail.textContent = 'Не удалось удалить: ' + err.message;
-        form.after(fail);
+      } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка: ' + error.message);
       }
     });
   });
-
 });
 </script>
 {% endblock %}
-
-

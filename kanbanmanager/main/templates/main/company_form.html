@@ -1,80 +1,282 @@
-{# templates/main/company_form.html #}
 {% extends 'main/base.html' %}
 {% block title %}{{ title }}{% endblock %}
 
+{% block extra_css %}
+<style>
+  :root {
+    --primary-color: #4361ee;
+    --success-color: #2ecc71;
+    --secondary-color: #6c757d;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --border-radius: 0.5rem;
+    --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --transition: all 0.3s ease;
+  }
+
+  .edit-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .edit-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+
+  .edit-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .edit-title i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+  }
+
+  .edit-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--box-shadow);
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-title i {
+    color: var(--primary-color);
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+  }
+
+  .form-control, .form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    outline: none;
+  }
+
+  .form-text {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+    margin-top: 0.3rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #3a56d4;
+    transform: translateY(-2px);
+  }
+
+  .btn-success {
+    background: var(--success-color);
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #27ae60;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: var(--secondary-color);
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .error-message {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+  }
+
+  @media (max-width: 768px) {
+    .edit-container {
+      padding: 1rem;
+    }
+    
+    .btn-group {
+      flex-direction: column;
+    }
+    
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4" style="max-width: 600px;">
-  <h1 class="mb-4">Редактировать компанию «{{ company.name }}»</h1>
+<div class="edit-container">
+  <div class="edit-header">
+    <h1 class="edit-title">
+      <i class="bi bi-building"></i>
+      Редактировать компанию «{{ company.name }}»
+    </h1>
+  </div>
 
-  {# ──────────────────────────────────────────────────── #}
-  {# Форма 1: редактируем все поля, кроме смены статуса  #}
-  <form method="post" action="{% url 'main:edit_company' company.pk %}">
-    {% csrf_token %}
-    {# скрытое поле, чтобы view понял, что это сохранение деталей #}
-    <input type="hidden" name="save_details" value="1" />
+  <!-- Форма редактирования данных компании -->
+  <div class="edit-section">
+    <h2 class="section-title">
+      <i class="bi bi-pencil-square"></i>
+      Основная информация
+    </h2>
 
-    <div class="mb-3">
-      <label for="{{ form.name.id_for_label }}" class="form-label">Название компании</label>
-      {{ form.name }}
-      {{ form.name.errors }}
-    </div>
+    <form method="post" action="{% url 'main:edit_company' company.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="save_details" value="1" />
 
-    <div class="mb-3">
-      <label for="{{ form.bin_number.id_for_label }}" class="form-label">БИН</label>
-      {{ form.bin_number }} <div class="form-text">Необязательно</div>
-      {{ form.bin_number.errors }}
-    </div>
+      <div class="form-group">
+        <label for="{{ form.name.id_for_label }}" class="form-label">Название компании</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+          <div class="error-message">{{ form.name.errors }}</div>
+        {% endif %}
+      </div>
 
-    <div class="mb-3">
-      <label for="{{ form.manager_name.id_for_label }}" class="form-label">Управляющий</label>
-      {{ form.manager_name }} <div class="form-text">Необязательно</div>
-      {{ form.manager_name.errors }}
-    </div>
+      <div class="form-group">
+        <label for="{{ form.bin_number.id_for_label }}" class="form-label">БИН</label>
+        {{ form.bin_number }}
+        <div class="form-text">Необязательно</div>
+        {% if form.bin_number.errors %}
+          <div class="error-message">{{ form.bin_number.errors }}</div>
+        {% endif %}
+      </div>
 
-    <div class="mb-3">
-      <label for="{{ form.debt_amount.id_for_label }}" class="form-label">Сумма долга</label>
-      {{ form.debt_amount }} <div class="form-text">Необязательно</div>
-      {{ form.debt_amount.errors }}
-    </div>
+      <div class="form-group">
+        <label for="{{ form.manager_name.id_for_label }}" class="form-label">Управляющий</label>
+        {{ form.manager_name }}
+        <div class="form-text">Необязательно</div>
+        {% if form.manager_name.errors %}
+          <div class="error-message">{{ form.manager_name.errors }}</div>
+        {% endif %}
+      </div>
 
-    <div class="mb-3">
-      <label for="{{ form.repaid_amount.id_for_label }}" class="form-label">Сумма погашения</label>
-      {{ form.repaid_amount }} <div class="form-text">Необязательно</div>
-      {{ form.repaid_amount.errors }}
-    </div>
+      <div class="form-group">
+        <label for="{{ form.debt_amount.id_for_label }}" class="form-label">Сумма долга</label>
+        {{ form.debt_amount }}
+        <div class="form-text">Необязательно</div>
+        {% if form.debt_amount.errors %}
+          <div class="error-message">{{ form.debt_amount.errors }}</div>
+        {% endif %}
+      </div>
 
-    <div class="mb-3">
-      <label for="{{ form.region.id_for_label }}" class="form-label">Регион</label>
-      {{ form.region }}
-      {{ form.region.errors }}
-    </div>
+      <div class="form-group">
+        <label for="{{ form.repaid_amount.id_for_label }}" class="form-label">Сумма погашения</label>
+        {{ form.repaid_amount }}
+        <div class="form-text">Необязательно</div>
+        {% if form.repaid_amount.errors %}
+          <div class="error-message">{{ form.repaid_amount.errors }}</div>
+        {% endif %}
+      </div>
 
-    <button type="submit" class="btn btn-primary">Сохранить детали</button>
-  </form>
+      <div class="form-group">
+        <label for="{{ form.region.id_for_label }}" class="form-label">Регион</label>
+        {{ form.region }}
+        {% if form.region.errors %}
+          <div class="error-message">{{ form.region.errors }}</div>
+        {% endif %}
+      </div>
 
-  <hr class="my-4">
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-save"></i> Сохранить изменения
+        </button>
+      </div>
+    </form>
+  </div>
 
-  {# ──────────────────────────────────────────────────── #}
-  {# Форма 2: смена статуса #}
-  <form method="post" action="{% url 'main:move_company' %}">
-    {% csrf_token %}
-    <input type="hidden" name="company_id" value="{{ company.pk }}">
+  <!-- Форма смены статуса -->
+  <div class="edit-section">
+    <h2 class="section-title">
+      <i class="bi bi-arrow-repeat"></i>
+      Смена статуса компании
+    </h2>
 
-    <div class="mb-3">
-      <label for="id_status_id" class="form-label">Новый статус</label>
-      <select name="status_id" id="id_status_id" class="form-select">
-        {% for st in statuses %}
-          <option value="{{ st.pk }}" {% if st.pk == company.status_id %}selected{% endif %}>
-            {{ st.name }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
+    <form method="post" action="{% url 'main:move_company' %}">
+      {% csrf_token %}
+      <input type="hidden" name="company_id" value="{{ company.pk }}">
 
-    <button type="submit" class="btn btn-success">Перевести на этап</button>
-    <a href="{% url 'main:company_detail' company.pk %}" class="btn btn-secondary ms-2">
-      ← Отменить
-    </a>
-  </form>
+      <div class="form-group">
+        <label for="id_status_id" class="form-label">Выберите новый статус</label>
+        <select name="status_id" id="id_status_id" class="form-select">
+          {% for st in statuses %}
+            <option value="{{ st.pk }}" {% if st.pk == company.status_id %}selected{% endif %}>
+              {{ st.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-check-circle"></i> Применить статус
+        </button>
+        <a href="{% url 'main:company_detail' company.pk %}" class="btn btn-secondary">
+          <i class="bi bi-x-circle"></i> Отменить
+        </a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

@@ -4,90 +4,436 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
-  #kazakhstan-map { width: 100%; height: 500px; margin-bottom: 2rem; }
-  .card {
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    border-radius: 10px;
+  :root {
+    --primary-color: #4361ee;
+    --success-color: #2ecc71;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --info-color: #3498db;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --border-radius: 0.75rem;
+    --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --transition: all 0.3s ease;
+  }
+  
+  .dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .dashboard-header {
+    margin-bottom: 2.5rem;
+  }
+  
+  .dashboard-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .dashboard-title i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+  }
+  
+  /* Карта */
+  .map-container {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
     padding: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  #kazakhstan-map {
+    width: 100%;
+    height: 500px;
+    border-radius: calc(var(--border-radius) - 0.5rem);
+    overflow: hidden;
+  }
+  
+  /* Карточки статистики */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  .stat-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+  
+  .stat-card.total { border-top: 4px solid var(--primary-color); }
+  .stat-card.debt { border-top: 4px solid var(--warning-color); }
+  .stat-card.paid { border-top: 4px solid var(--success-color); }
+  .stat-card.overdue { border-top: 4px solid var(--danger-color); }
+  
+  .stat-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  
+  .stat-value.currency::after {
+    content: " ₸";
+    font-size: 0.8em;
+  }
+  
+  /* Региональные карточки */
+  .regions-section {
+    margin-bottom: 3rem;
+  }
+  
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin: 0 0 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .section-title i {
+    color: var(--primary-color);
+  }
+  
+  .regions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .region-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: var(--transition);
+  }
+  
+  .region-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  }
+  
+  .region-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .region-body {
+    padding: 1.25rem;
+  }
+  
+  .region-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  
+  .region-stat:last-child {
+    border-bottom: none;
+  }
+  
+  .stat-label {
+    font-weight: 500;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .stat-number {
+    font-weight: 600;
+  }
+  
+  /* Графики */
+  .chart-container {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  
+  .chart-nav {
+    display: flex;
+    gap: 0.5rem;
     margin-bottom: 1rem;
   }
-  .card-title {
-    font-size: 1.1rem;
-    font-weight: bold;
+  
+  .chart-nav-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    background: var(--light-color);
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
   }
-  .region-table th, .region-table td {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
+  
+  .chart-nav-btn.active {
+    background: var(--primary-color);
+    color: white;
+  }
+  
+  .chart {
+    width: 100%;
+    height: 400px;
+    display: none;
+  }
+  
+  .chart.active {
+    display: block;
+  }
+  
+  .chart-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+  }
+  
+  .chart-label {
+    width: 200px;
+    font-weight: 500;
+    margin-right: 1rem;
+  }
+  
+  .chart-bar-container {
+    flex: 1;
+    height: 30px;
+    background: #f0f0f0;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  
+  .chart-bar-fill {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 15px;
+    transition: width 0.5s ease;
+  }
+  
+  .chart-value {
+    width: 80px;
+    text-align: right;
+    font-weight: 600;
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 768px) {
+    .dashboard-container {
+      padding: 1.5rem 1rem;
+    }
+    
+    .stats-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .regions-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .chart-label {
+      width: 150px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+    }
+    
+    .chart-label {
+      width: 120px;
+      font-size: 0.9rem;
+    }
+    
+    .chart-value {
+      width: 60px;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <h1 class="mb-4">📍 Компании по регионам Казахстана</h1>
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">
+      <i class="bi bi-map"></i>
+      Компании по регионам Казахстана
+    </h1>
+  </div>
 
   <!-- Интерактивная карта -->
-  <div id="kazakhstan-map" style="width:100%;height:400px;margin-bottom:2rem;"></div>
+  <div class="map-container">
+    <div id="kazakhstan-map"></div>
+  </div>
 
-  <!-- Общие итоги -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card bg-light">
-        <div class="card-title">Всего компаний</div>
-        <div class="display-6" id="totalCompanies">{{ total_companies }}</div>
+  <!-- Общие показатели -->
+  <div class="stats-grid">
+    <div class="stat-card total">
+      <div class="stat-title">
+        <i class="bi bi-buildings"></i>
+        Всего компаний
       </div>
+      <p class="stat-value">{{ total_companies }}</p>
     </div>
-    <div class="col-md-3">
-      <div class="card bg-warning">
-        <div class="card-title">Суммарный долг</div>
-        <div class="display-6" id="totalDebt">{{ total_debt|floatformat:0 }} ₸</div>
+    
+    <div class="stat-card debt">
+      <div class="stat-title">
+        <i class="bi bi-cash-stack"></i>
+        Суммарный долг
       </div>
+      <p class="stat-value currency">{{ total_debt|floatformat:0 }}</p>
     </div>
-    <div class="col-md-3">
-      <div class="card bg-success text-white">
-        <div class="card-title">Погашено</div>
-        <div class="display-6" id="totalRepaid">{{ total_repaid|floatformat:0 }} ₸</div>
+    
+    <div class="stat-card paid">
+      <div class="stat-title">
+        <i class="bi bi-check-circle"></i>
+        Погашено
       </div>
+      <p class="stat-value currency">{{ total_repaid|floatformat:0 }}</p>
     </div>
-    <div class="col-md-3">
-      <div class="card bg-danger text-white">
-        <div class="card-title">Просрочено</div>
-        <div class="display-6" id="overdueCount">{{ overdue_count }}</div>
+    
+    <div class="stat-card overdue">
+      <div class="stat-title">
+        <i class="bi bi-exclamation-triangle"></i>
+        Просрочено
       </div>
+      <p class="stat-value">{{ overdue_count }}</p>
     </div>
   </div>
 
-  <!-- Карточки по регионам -->
-  <h4 class="mt-4">📊 Статистика по регионам</h4>
-  <div class="row g-3">
-    {% for region in region_stats %}
-      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-        <div class="card h-100">
-          <div class="card-header text-center fw-bold">
+  <!-- Статистика по регионам -->
+  <div class="regions-section">
+    <h2 class="section-title">
+      <i class="bi bi-bar-chart"></i>
+      Статистика по регионам
+    </h2>
+    
+    <div class="regions-grid">
+      {% for region in region_stats %}
+        <div class="region-card" data-region="{{ region.region }}">
+          <div class="region-header">
             {{ region.region }}
           </div>
-          <div class="card-body p-2">
-            <ul class="list-unstyled mb-0">
-              <li>🏢 <strong>Компаний:</strong> {{ region.count }}</li>
-              <li>💰 <strong>Долг:</strong> {{ region.debt|floatformat:0 }} ₸</li>
-              <li>✅ <strong>Погашено:</strong> {{ region.paid|floatformat:0 }} ₸</li>
-              <li>📊 <strong>Погашено %:</strong>
+          <div class="region-body">
+            <div class="region-stat">
+              <span class="stat-label">
+                <i class="bi bi-buildings"></i>
+                Компаний
+              </span>
+              <span class="stat-number">{{ region.count }}</span>
+            </div>
+            
+            <div class="region-stat">
+              <span class="stat-label">
+                <i class="bi bi-cash-stack"></i>
+                Долг
+              </span>
+              <span class="stat-number">{{ region.debt|floatformat:0 }} ₸</span>
+            </div>
+            
+            <div class="region-stat">
+              <span class="stat-label">
+                <i class="bi bi-check-circle"></i>
+                Погашено
+              </span>
+              <span class="stat-number">{{ region.paid|floatformat:0 }} ₸</span>
+            </div>
+            
+            <div class="region-stat">
+              <span class="stat-label">
+                <i class="bi bi-percent"></i>
+                Погашено %
+              </span>
+              <span class="stat-number">
                 {% if region.debt > 0 %}
                   {{ region.paid|divisibleby:region.debt|floatformat:2 }}%
                 {% else %}
                   —
                 {% endif %}
-              </li>
-            </ul>
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-    {% endfor %}
+      {% endfor %}
+    </div>
   </div>
 
   <!-- Графики -->
-  <div id="regionBarChart" style="height:400px;" class="mt-5"></div>
-  <div id="statusBarChart" style="height:400px;" class="mt-5"></div>
+  <div class="chart-container">
+    <h2 class="section-title">
+      <i class="bi bi-graph-up"></i>
+      Визуализация данных
+    </h2>
+    
+    <div class="chart-nav">
+      <button class="chart-nav-btn active" data-chart="regions">По регионам</button>
+      <button class="chart-nav-btn" data-chart="statuses">По статусам</button>
+    </div>
+    
+    <div id="regionsChart" class="chart active">
+      {% for region in region_stats %}
+        <div class="chart-bar">
+          <div class="chart-label">{{ region.region }}</div>
+          <div class="chart-bar-container">
+            <div class="chart-bar-fill" style="width: {% widthratio region.count max_region_count 100 %}%"></div>
+          </div>
+          <div class="chart-value">{{ region.count }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    
+    <div id="statusesChart" class="chart">
+      {% for status in status_stats %}
+        <div class="chart-bar">
+          <div class="chart-label">{{ status.status__name }}</div>
+          <div class="chart-bar-container">
+            <div class="chart-bar-fill" style="width: {% widthratio status.count max_status_count 100 %}%"></div>
+          </div>
+          <div class="chart-value">{{ status.count }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
 
 <!-- JSON-данные для JS -->
@@ -95,10 +441,8 @@
 {{ status_stats|json_script:"status-data" }}
 {% endblock %}
 
-
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
   const regionData = JSON.parse(document.getElementById("region-data").textContent);
   const statusData = JSON.parse(document.getElementById("status-data").textContent);
@@ -110,50 +454,81 @@
   }).addTo(map);
 
   // 2. Стиль и действия на регионах
+  function getRegionColor(count) {
+    const maxCount = Math.max(...regionData.map(r => r.count));
+    const ratio = count / maxCount;
+    
+    if (ratio > 0.8) return '#e74c3c';
+    if (ratio > 0.6) return '#f39c12';
+    if (ratio > 0.4) return '#3498db';
+    if (ratio > 0.2) return '#2ecc71';
+    return '#95a5a6';
+  }
+
   function style(feature) {
-    return { fillColor: '#add8e6', weight: 1, color: '#555', fillOpacity: 0.7 };
+    const region = regionData.find(r => r.region === feature.properties.name);
+    return { 
+      fillColor: region ? getRegionColor(region.count) : '#bdc3c7',
+      weight: 1,
+      color: '#555',
+      fillOpacity: 0.8
+    };
+  }
+
+  function highlightFeature(e) {
+    const layer = e.target;
+    layer.setStyle({
+      weight: 2,
+      color: '#333',
+      fillOpacity: 1
+    });
+    layer.bringToFront();
+  }
+
+  function resetHighlight(e) {
+    geojson.resetStyle(e.target);
+  }
+
+  function zoomToFeature(e) {
+    map.fitBounds(e.target.getBounds(), { padding: [50, 50] });
+    updateRegionCharts(e.target.feature.properties.name);
   }
 
   function onEachFeature(feature, layer) {
     layer.on({
-      click: () => updateRegionCharts(feature.properties.name),
-      mouseover: () => layer.setStyle({ fillOpacity: 1 }),
-      mouseout: () => layer.setStyle({ fillOpacity: 0.7 })
+      mouseover: highlightFeature,
+      mouseout: resetHighlight,
+      click: zoomToFeature
     });
   }
 
+  let geojson;
   fetch('/static/geo/gadm41_KAZ_1.json')
     .then(res => res.json())
-    .then(data => L.geoJSON(data, { style, onEachFeature }).addTo(map));
+    .then(data => {
+      geojson = L.geoJSON(data, { 
+        style,
+        onEachFeature
+      }).addTo(map);
+    });
 
-  // 3. Начальные графики
-  const regionLabels = regionData.map(r => r.region);
-  const regionCounts = regionData.map(r => r.count);
-
-  Plotly.newPlot("regionBarChart", [{
-    x: regionLabels,
-    y: regionCounts,
-    type: 'bar',
-    marker: { color: 'rgba(0, 123, 255, 0.7)' }
-  }], {
-    title: "Количество компаний по регионам",
-    xaxis: { title: "Регион" },
-    yaxis: { title: "Компаний" }
-  });
-
-  const sortedStatus = statusData.slice().sort((a, b) => a.status__order - b.status__order);
-  const statusLabels = sortedStatus.map(s => s.status__name);
-  const statusCounts = sortedStatus.map(s => s.count);
-
-  Plotly.newPlot("statusBarChart", [{
-    x: statusLabels,
-    y: statusCounts,
-    type: 'bar',
-    marker: { color: 'rgba(40, 167, 69, 0.7)' }
-  }], {
-    title: "Компании по статусам",
-    xaxis: { title: "Статус", automargin: true },
-    yaxis: { title: "Компаний", dtick: 1 }
+  // 3. Переключение между графиками
+  document.querySelectorAll('.chart-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const chartId = btn.dataset.chart;
+      
+      // Активируем выбранную кнопку
+      document.querySelectorAll('.chart-nav-btn').forEach(b => {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      
+      // Показываем выбранный график
+      document.querySelectorAll('.chart').forEach(chart => {
+        chart.classList.remove('active');
+      });
+      document.getElementById(`${chartId}Chart`).classList.add('active');
+    });
   });
 
   // 4. При клике на регион
@@ -161,36 +536,32 @@
     const region = regionData.find(r => r.region === regionName);
     if (!region) return;
 
-    document.getElementById("totalCompanies").innerText = region.count;
-    document.getElementById("totalDebt").innerText = Math.round(region.debt).toLocaleString() + " ₸";
-    document.getElementById("totalRepaid").innerText = Math.round(region.paid).toLocaleString() + " ₸";
-    document.getElementById("overdueCount").innerText = ""; // Здесь можно логикой рассчитать
-
-    Plotly.react("regionBarChart", [{
-      x: [regionName],
-      y: [region.count],
-      type: 'bar',
-      marker: { color: 'rgba(0, 123, 255, 0.7)' }
-    }], {
-      title: `Количество компаний в регионе: ${regionName}`,
-      xaxis: { title: "Регион" },
-      yaxis: { title: "Компаний", dtick: 1 }
-    });
-
-    const regionStatus = statusData.filter(s => s.region === regionName);
-    const labels = regionStatus.map(s => s.status__name);
-    const counts = regionStatus.map(s => s.count);
-
-    Plotly.react("statusBarChart", [{
-      x: labels,
-      y: counts,
-      type: 'bar',
-      marker: { color: 'rgba(40, 167, 69, 0.7)' }
-    }], {
-      title: `Статусы компаний в регионе: ${regionName}`,
-      xaxis: { title: "Статус", automargin: true },
-      yaxis: { title: "Компаний", dtick: 1 }
+    // Обновляем карточки статистики
+    document.querySelector('.stat-card.total .stat-value').textContent = region.count;
+    document.querySelector('.stat-card.debt .stat-value').textContent = Math.round(region.debt).toLocaleString() + ' ₸';
+    document.querySelector('.stat-card.paid .stat-value').textContent = Math.round(region.paid).toLocaleString() + ' ₸';
+    
+    // Подсветка выбранной карточки региона
+    document.querySelectorAll('.region-card').forEach(card => {
+      card.style.border = 'none';
+      if (card.dataset.region === regionName) {
+        card.style.border = '2px solid var(--primary-color)';
+      }
     });
   }
+
+  // Обработка кликов по карточкам регионов
+  document.querySelectorAll('.region-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const regionName = card.dataset.region;
+      const regionFeature = Object.values(geojson._layers).find(layer => 
+        layer.feature.properties.name === regionName
+      );
+      if (regionFeature) {
+        map.fitBounds(regionFeature.getBounds(), { padding: [50, 50] });
+        updateRegionCharts(regionName);
+      }
+    });
+  });
 </script>
 {% endblock %}
