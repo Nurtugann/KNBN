@@ -1,5 +1,5 @@
 {% extends 'main/base.html' %}
-{% block title %}Табличный обзор: Компании и Статусы{% endblock %}
+{% block title %}Интерактивная карта статусов компаний{% endblock %}
 
 {% block extra_css %}
   <style>
@@ -9,14 +9,29 @@
       --color-danger: #fd7e14;
       --color-critical: #dc3545;
       --color-paused: #6c757d;
+      --color-primary: #4e73df;
+      --color-light: #f8f9fc;
+      --color-dark: #5a5c69;
     }
     
     .dashboard-container {
-      background-color: #f8f9fa;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      padding: 2rem;
+      background-color: #f8f9fc;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      padding: 2.5rem;
       margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .dashboard-container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #4e73df, #224abe);
     }
     
     .sticky-col {
@@ -24,140 +39,196 @@
       left: 0;
       background-color: #fff;
       z-index: 10;
-      min-width: 220px;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+      min-width: 240px;
+      box-shadow: 3px 0 8px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
     }
     
     .group-toggle-buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 1.5rem;
     }
     
     .group-toggle-btn {
-      border: 1px solid #dee2e6;
-      background: white;
-      color: #495057;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      transition: all 0.2s;
+      border: none;
+      background: #e3e6f0;
+      color: #5a5c69;
+      padding: 0.6rem 1.2rem;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     
     .group-toggle-btn:hover {
-      background: #f1f3f5;
-      border-color: #adb5bd;
+      background: #d1d3e2;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
     .group-toggle-btn.active {
-      background: #0d6efd;
+      background: #4e73df;
       color: white;
-      border-color: #0d6efd;
+      box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);
+    }
+    
+    .group-toggle-btn i {
+      margin-right: 8px;
+      font-size: 0.9em;
     }
     
     .table-container {
       position: relative;
       overflow: hidden;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
       background: white;
-      width: 100%; /* Добавляем явную ширину */
+      width: 100%;
     }
 
     .table-scroll-wrapper {
       overflow-x: auto;
       position: relative;
-      -webkit-overflow-scrolling: touch; /* Для плавной прокрутки на iOS */
-      width: 100%; /* Явно задаем ширину */
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+      padding-bottom: 10px;
     }
 
     .table-responsive {
-      width: max-content; /* Важно: позволяет таблице быть шире контейнера */
-      min-width: 100%; /* Но не уже контейнера */
+      width: max-content;
+      min-width: 100%;
       margin-bottom: 0;
     }
 
     .table {
       margin-bottom: 0;
-      font-size: 0.9rem;
-      width: auto; /* Отменяем возможные фиксированные ширины */
-      min-width: 100%; /* Таблица не может быть уже контейнера */
+      font-size: 0.92rem;
+      width: auto;
+      min-width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
     }
     
     .table thead th {
       vertical-align: middle;
-      background-color: #f8f9fa;
-      border-bottom-width: 1px;
+      background-color: #f8f9fc;
+      border-bottom: 2px solid #e3e6f0;
       font-weight: 600;
-      color: #495057;
+      color: #4e73df;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 1rem 0.75rem;
     }
     
     .status-header {
-      min-width: 120px;
-      max-width: 180px;
+      min-width: 140px;
+      max-width: 200px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       text-align: center;
       position: relative;
+      transition: all 0.3s ease;
     }
     
     .status-header:hover {
       white-space: normal;
       overflow: visible;
-      z-index: 20;
+      z-index: 30;
       background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transform: scale(1.05);
+      color: #224abe;
     }
     
     .company-name {
-      font-weight: 500;
-      color: #212529;
-      transition: color 0.2s;
+      font-weight: 600;
+      color: #2e59d9;
+      transition: all 0.3s ease;
+      display: inline-block;
+      padding: 0.2rem 0;
     }
     
     .company-name:hover {
-      color: #0d6efd;
-      text-decoration: none;
+      color: #1c3ca0;
+      transform: translateX(3px);
     }
     
     .status-cell {
       padding: 0 !important;
       text-align: center;
       border-right: 1px solid #f1f3f5 !important;
-    }
-    
-    .status-link {
-      display: block;
-      padding: 0.5rem;
-      height: 100%;
-      transition: all 0.2s;
-      text-decoration: none !important;
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-    
-    .status-link:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      z-index: 5;
+      transition: all 0.3s ease;
       position: relative;
     }
     
+    .status-link {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem 0.5rem;
+      height: 100%;
+      min-height: 60px;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      text-decoration: none !important;
+      font-size: 0.85rem;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .status-link::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 3px;
+      background: currentColor;
+      transition: width 0.3s ease;
+    }
+    
+    .status-link:hover {
+      transform: scale(1.03);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      z-index: 10;
+    }
+    
+    .status-link:hover::after {
+      width: 80%;
+    }
+    
     .status-completed {
-      background-color: rgba(40, 167, 69, 0.1);
+      background-color: rgba(40, 167, 69, 0.08);
       color: var(--color-safe);
     }
     
     .status-current {
       font-weight: bold;
+      position: relative;
+    }
+    
+    .status-current::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: currentColor;
     }
     
     .status-safe {
-      background-color: rgba(40, 167, 69, 0.15);
+      background-color: rgba(40, 167, 69, 0.1);
       color: var(--color-safe);
     }
     
@@ -182,36 +253,52 @@
     }
     
     .status-empty {
-      background-color: #f8f9fa;
+      background-color: #f8f9fc;
+      color: #b7b9cc;
     }
     
     .legend {
       display: flex;
       flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
     
     .legend-item {
       display: flex;
       align-items: center;
-      font-size: 0.85rem;
-      color: #495057;
+      font-size: 0.9rem;
+      color: #5a5c69;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      background: #f8f9fc;
+      transition: all 0.3s ease;
+    }
+    
+    .legend-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
     }
     
     .legend-color {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border-radius: 4px;
-      margin-right: 8px;
+      margin-right: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .search-card {
       background: white;
-      border-radius: 8px;
-      padding: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      margin-bottom: 1.5rem;
+      border-radius: 12px;
+      padding: 1.8rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+      margin-bottom: 2rem;
+      border: 1px solid #e3e6f0;
     }
     
     .hidden-group {
@@ -219,74 +306,301 @@
     }
     
     .table-title {
-      color: #343a40;
-      margin-bottom: 1.5rem;
-      font-weight: 600;
+      color: #2e59d9;
+      margin-bottom: 2rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    
+    .table-title h1 {
+      font-size: 1.8rem;
+      margin: 0;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+    
+    .table-title h1::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 30px;
+      background: linear-gradient(to bottom, #4e73df, #224abe);
+      border-radius: 4px;
     }
     
     .add-company-btn {
-      padding: 0.5rem 1.25rem;
-      border-radius: 6px;
-      font-weight: 500;
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+      border: none;
+      box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .add-company-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(78, 115, 223, 0.4);
     }
     
     .add-company-btn i {
       font-size: 1rem;
     }
     
-    @media (max-width: 768px) {
+    .status-icon {
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+    
+    .company-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    
+    .company-region {
+      font-size: 0.75rem;
+      color: #858796;
+      background: #f8f9fc;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+      width: fit-content;
+    }
+    
+    .scroll-indicator {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 30px;
+      background: linear-gradient(90deg, rgba(248,249,252,0) 0%, rgba(248,249,252,0.9) 50%, rgba(248,249,252,1) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    
+    .scroll-indicator i {
+      color: #4e73df;
+      font-size: 1.5rem;
+      animation: bounceRight 2s infinite;
+    }
+    
+    @keyframes bounceRight {
+      0%, 20%, 50%, 80%, 100% {transform: translateX(0);}
+      40% {transform: translateX(-5px);}
+      60% {transform: translateX(-3px);}
+    }
+    
+    .table-scroll-wrapper:hover .scroll-indicator {
+      opacity: 1;
+    }
+    
+    .empty-state {
+      padding: 3rem 1rem;
+      text-align: center;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      color: #d1d3e2;
+      margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h4 {
+      color: #5a5c69;
+      margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+      color: #b7b9cc;
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-control, .form-select {
+      border: 1px solid #d1d3e2;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: #4e73df;
+      box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .form-check-input:checked {
+      background-color: #4e73df;
+      border-color: #4e73df;
+    }
+    
+    @media (max-width: 992px) {
       .dashboard-container {
-        padding: 1rem;
+        padding: 1.5rem;
       }
       
       .table-title {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1rem;
       }
       
       .sticky-col {
-        min-width: 180px;
+        min-width: 200px;
+      }
+      
+      .status-header {
+        min-width: 120px;
       }
     }
+    
+    @media (max-width: 768px) {
+      .dashboard-container {
+        padding: 1.25rem;
+        border-radius: 12px;
+      }
+      
+      .search-card {
+        padding: 1.25rem;
+      }
+      
+      .legend {
+        gap: 0.8rem;
+        padding: 0.8rem;
+      }
+      
+      .legend-item {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.6rem;
+      }
+      
+      .status-link {
+        padding: 0.8rem 0.4rem;
+        min-height: 50px;
+      }
+    }
+    
+    /* Анимации */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .table-container {
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    tr {
+      animation: fadeIn 0.3s ease-out;
+      animation-fill-mode: both;
+    }
+    
+    tr:nth-child(1) { animation-delay: 0.1s; }
+    tr:nth-child(2) { animation-delay: 0.2s; }
+    tr:nth-child(3) { animation-delay: 0.3s; }
+    tr:nth-child(4) { animation-delay: 0.4s; }
+    tr:nth-child(5) { animation-delay: 0.5s; }
+    tr:nth-child(6) { animation-delay: 0.6s; }
   </style>
 {% endblock %}
 
 {% block extra_js %}
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Группировка колонок
+      // Группировка колонок с анимацией
       document.querySelectorAll('.group-toggle-btn').forEach(btn => {
         btn.addEventListener('click', function() {
           const groupNum = this.dataset.group;
+          
+          // Переключаем активное состояние кнопки
           this.classList.toggle('active');
           
-          const headers = document.querySelectorAll('th.group-' + groupNum);
-          const cells = document.querySelectorAll('td.group-' + groupNum);
-          const isHidden = headers[0]?.classList.contains('hidden-group');
+          // Находим все элементы с классом group-X (и th, и td)
+          const elements = document.querySelectorAll(`.group-${groupNum}`);
+          const isHidden = elements[0]?.classList.contains('hidden-group');
           
-          headers.forEach(h => h.classList.toggle('hidden-group', !isHidden));
-          cells.forEach(c => c.classList.toggle('hidden-group', !isHidden));
+          // Обновляем иконку на кнопке
+          const icon = this.querySelector('i');
+          if (isHidden) {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+          } else {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+          }
+          
+          // Переключаем видимость всех элементов группы
+          elements.forEach(el => {
+            el.classList.toggle('hidden-group');
+          });
         });
       });
-      
-      // Улучшенная прокрутка таблицы
+
+      // Индикатор прокрутки
       const tableWrapper = document.querySelector('.table-scroll-wrapper');
       if (tableWrapper) {
+        tableWrapper.addEventListener('scroll', function() {
+          const scrollIndicator = this.querySelector('.scroll-indicator');
+          if (this.scrollWidth > this.clientWidth && 
+              this.scrollLeft < (this.scrollWidth - this.clientWidth - 10)) {
+            scrollIndicator.style.opacity = '1';
+          } else {
+            scrollIndicator.style.opacity = '0';
+          }
+        });
+        
         tableWrapper.addEventListener('wheel', function(e) {
-          // Если есть горизонтальная прокрутка и пользователь скроллит вбок
           if (this.scrollWidth > this.clientWidth && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
             this.scrollLeft += e.deltaX;
             e.preventDefault();
           }
-          // Во всех остальных случаях - стандартное поведение (вертикальная прокрутка)
         }, { passive: false });
+      }
+      
+      // Подсветка текущего статуса при наведении на компанию
+      const rows = document.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+          const currentStatus = this.querySelector('.status-current');
+          if (currentStatus) {
+            currentStatus.style.transform = 'scale(1.05)';
+            currentStatus.style.zIndex = '15';
+            currentStatus.style.boxShadow = '0 5px 20px rgba(0,0,0,0.1)';
+          }
+        });
+        
+        row.addEventListener('mouseleave', function() {
+          const currentStatus = this.querySelector('.status-current');
+          if (currentStatus) {
+            currentStatus.style.transform = '';
+            currentStatus.style.zIndex = '';
+            currentStatus.style.boxShadow = '';
+          }
+        });
+      });
+      
+      // Плавная прокрутка к таблице после фильтрации
+      if (window.location.search.includes('q=')) {
+        setTimeout(() => {
+          document.querySelector('.table-container').scrollIntoView({
+            behavior: 'smooth'
+          });
+        }, 300);
       }
     });
   </script>
@@ -295,9 +609,9 @@
 {% block content %}
 <div class="dashboard-container">
   <div class="table-title">
-    <h1>Табличный обзор компаний</h1>
+    <h1>Интерактивная карта статусов компаний</h1>
     <a href="{% url 'main:add_company' %}" class="btn btn-success add-company-btn">
-      <i class="fas fa-plus"></i> Добавить компанию
+      <i class="fas fa-plus-circle"></i> Добавить компанию
     </a>
   </div>
 
@@ -325,11 +639,14 @@
   </div>
 
   <div class="search-card">
-    <form method="get" class="row g-3">
-      <div class="col-md-5">
-        <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Поиск по названию или БИН...">
+    <form method="get" class="row g-3 align-items-center">
+      <div class="col-lg-5 col-md-12">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Поиск по названию, БИН или региону...">
+        </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-lg-3 col-md-6 col-sm-12">
         <select name="region" class="form-select">
           <option value="">Все регионы</option>
           {% for code,name in regions %}
@@ -337,15 +654,15 @@
           {% endfor %}
         </select>
       </div>
-      <div class="col-md-2 d-flex align-items-center">
-        <div class="form-check">
+      <div class="col-lg-2 col-md-3 col-sm-6">
+        <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" name="overdue" id="overdueCheck" value="1" {% if overdue_filter %}checked{% endif %}>
-          <label class="form-check-label" for="overdueCheck">Только просроченные</label>
+          <label class="form-check-label" for="overdueCheck">Просроченные</label>
         </div>
       </div>
-      <div class="col-md-2">
+      <div class="col-lg-2 col-md-3 col-sm-6">
         <button type="submit" class="btn btn-primary w-100">
-          <i class="fas fa-filter"></i> Фильтровать
+          <i class="fas fa-filter me-2"></i> Применить
         </button>
       </div>
     </form>
@@ -353,27 +670,30 @@
 
   <div class="group-toggle-buttons">
     {% for group_name, group_statuses in grouped_statuses %}
-      <button type="button" class="group-toggle-btn" data-group="{{ forloop.counter0 }}">
-        <i class="fas fa-eye"></i> {{ group_name }}
+      <button type="button" class="group-toggle-btn {% if forloop.first %}active{% endif %}" data-group="{{ forloop.counter0 }}">
+        <i class="fas {% if forloop.first %}fa-eye{% else %}fa-eye-slash{% endif %}"></i> {{ group_name }}
       </button>
     {% endfor %}
   </div>
 
   <div class="table-container">
     <div class="table-scroll-wrapper">
+      <div class="scroll-indicator">
+        <i class="fas fa-chevron-right"></i>
+      </div>
       <div class="table-responsive">
         <table class="table table-hover align-middle" id="mainTable">
           <thead class="table-light">
             <tr>
               <th class="sticky-col" rowspan="2" scope="col">Компания</th>
               {% for group_name, group_statuses in grouped_statuses %}
-                <th class="text-center group-{{ forloop.counter0 }}" colspan="{{ group_statuses|length }}">{{ group_name }}</th>
+                <th class="text-center group-{{ forloop.counter0 }} {% if not forloop.first %}hidden-group{% endif %}" colspan="{{ group_statuses|length }}">{{ group_name }}</th>
               {% endfor %}
             </tr>
             <tr>
               {% for group_name, group_statuses in grouped_statuses %}
                 {% for status in group_statuses %}
-                  <th class="status-header group-{{ forloop.parentloop.counter0 }}" title="{{ status.name }}">
+                  <th class="status-header group-{{ forloop.parentloop.counter0 }} {% if not forloop.parentloop.first %}hidden-group{% endif %}" title="{{ status.name }}">
                     {{ status.name }}
                   </th>
                 {% endfor %}
@@ -384,42 +704,52 @@
             {% for company in companies %}
               <tr>
                 <td class="sticky-col">
-                  <a href="{% url 'main:company_detail' company.pk %}" class="company-name">
-                    {{ company.name }}
-                  </a>
-                  <div class="text-muted small">{{ company.bin }}</div>
+                  <div class="company-meta">
+                    <a href="{% url 'main:company_detail' company.pk %}" class="company-name">
+                      {{ company.name }}
+                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="text-muted small">{{ company.bin }}</span>
+                      {% if company.region %}
+                        <span class="company-region">{{ company.region }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
                 </td>
                 {% for group_name, group_statuses in grouped_statuses %}
                   {% for status in group_statuses %}
                     {% if status.order < company.max_reached %}
-                      <td class="status-cell status-completed group-{{ forloop.parentloop.counter0 }}">
-                        <a href="{% url 'main:attach_docs' company.pk status.pk %}" class="status-link">
-                          <i class="fas fa-check"></i>
+                      <td class="status-cell status-completed group-{{ forloop.parentloop.counter0 }} {% if not forloop.parentloop.first %}hidden-group{% endif %}">
+                        <a href="{% url 'main:attach_docs' company.pk status.pk %}" class="status-link" title="Завершено">
+                          <i class="fas fa-check-circle status-icon"></i>
+                          <span>Завершено</span>
                         </a>
                       </td>
                     {% elif status.order == company.max_reached %}
                       {% if company.is_paused %}
-                        <td class="status-cell status-paused status-current group-{{ forloop.parentloop.counter0 }}">
-                          <a href="{% url 'main:attach_docs' company.pk status.pk %}" class="status-link">
-                            <i class="fas fa-pause"></i> {{ company.days_left }}д
+                        <td class="status-cell status-paused status-current group-{{ forloop.parentloop.counter0 }} {% if not forloop.parentloop.first %}hidden-group{% endif %}">
+                          <a href="{% url 'main:attach_docs' company.pk status.pk %}" class="status-link" title="Приостановлено - {{ company.days_left }} дней">
+                            <i class="fas fa-pause-circle status-icon"></i>
+                            <span>{{ company.days_left }}д</span>
                           </a>
                         </td>
                       {% else %}
-                        <td class="status-cell status-current group-{{ forloop.parentloop.counter0 }}
+                        <td class="status-cell status-current group-{{ forloop.parentloop.counter0 }} {% if not forloop.parentloop.first %}hidden-group{% endif %}
                           {% if company.is_overdue %}status-critical
                           {% elif company.days_left <= 3 %}status-danger
                           {% elif company.days_left <= 7 %}status-warning
-                          {% else %}status-safe{% endif %}">
+                          {% else %}status-safe{% endif %}" title="{% if company.is_overdue %}Просрочено{% else %}Текущий статус{% endif %} - {{ company.days_left }} дней">
                           <a href="{% url 'main:attach_docs' company.pk status.pk %}" class="status-link">
-                            {% if company.is_overdue %}<i class="fas fa-exclamation-circle"></i>{% else %}<i class="fas fa-arrow-right"></i>{% endif %}
-                            {{ company.days_left }}д
+                            <i class="fas {% if company.is_overdue %}fa-exclamation-circle{% else %}fa-arrow-right{% endif %} status-icon"></i>
+                            <span>{{ company.days_left }}д</span>
                           </a>
                         </td>
                       {% endif %}
                     {% else %}
-                      <td class="status-cell status-empty group-{{ forloop.parentloop.counter0 }}">
-                        <a href="{% url 'main:attach_docs' company.pk status.pk %}" class="status-link">
-                          &mdash;
+                      <td class="status-cell status-empty group-{{ forloop.parentloop.counter0 }} {% if not forloop.parentloop.first %}hidden-group{% endif %}">
+                        <a href="{% url 'main:attach_docs' company.pk status.pk %}" class="status-link" title="Не начато">
+                          <i class="far fa-circle status-icon"></i>
+                          <span>&mdash;</span>
                         </a>
                       </td>
                     {% endif %}
@@ -428,8 +758,15 @@
               </tr>
             {% empty %}
               <tr>
-                <td colspan="1000" class="text-center py-4 text-muted">
-                  <i class="fas fa-info-circle me-2"></i>Нет компаний, соответствующих критериям поиска
+                <td colspan="1000">
+                  <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h4>Не найдено компаний</h4>
+                    <p>Попробуйте изменить параметры фильтрации</p>
+                    <a href="?" class="btn btn-outline-primary">
+                      <i class="fas fa-sync-alt me-2"></i>Сбросить фильтры
+                    </a>
+                  </div>
                 </td>
               </tr>
             {% endfor %}
